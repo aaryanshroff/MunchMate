@@ -1,5 +1,3 @@
-import './css/genericStyles.css';
-
 import RestaurantTypesSelector from './RestaurantTypesSelector.jsx';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -148,9 +146,9 @@ function AddRestaurantPage() {
                 />
             </div>
             <RestaurantTypesSelector selectedTypes={selectedTypes} setSelectedTypes={setSelectedTypes} error={error} setError={setError} />
-            <div className='button' onClick={handleSubmit}>
+            <button type="button" className='btn btn-secondary' onClick={handleSubmit}>
                 Add Restaurant
-            </div>
+            </button>
         </div>
     );
 }

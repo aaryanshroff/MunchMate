@@ -61,7 +61,6 @@ def _list_restaurants(
 @app.get("/api/restaurants/add")
 def add_restaurant():
     try:
-        # SQLite FTS5 is not case-sensitive
         name = request.args.get("name", "").strip()
         address = request.args.get("address", "").strip()
         city = request.args.get("city", "").strip()
