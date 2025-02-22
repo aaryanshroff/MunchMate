@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import Layout from "./Layout.jsx";
 import Restaurants from './Restaurants.jsx';
 import AddRestaurantPage from "./AddRestaurantPage.jsx";
+import Profile from "./UserProfile.jsx";
 
 
 createRoot(document.getElementById('root')).render(
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Layout />}>
             <Route index element={<Restaurants />} />
             <Route path="/add-restaurant" element={<AddRestaurantPage />} />
+            <Route path="profile/:uid" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>
