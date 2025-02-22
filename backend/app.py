@@ -109,6 +109,57 @@ def _list_types() -> list[RestaurantType]:
 
     return db.query_db_from_file(sql_file)
 
+# 1. Get User Profile Details
+@app.get("/api/users/<int:uid>")
+def get_user_profile(uid):
+    try:
+        sql_file = Path("queries") / "get_user_profile.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (uid,))
+        if results:
+            return {"data": results[0]}, 200
+        else:
+            return {"error": "User not found"}, 404
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+# 2. Get Followers List
+@app.get("/api/users/<int:uid>/followers")
+def get_user_followers(uid):
+    try:
+        sql_file = Path("queries") / "list_followers.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (uid,))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+# 3. Get Following List
+@app.get("/api/users/<int:uid>/following")
+def get_user_following(uid):
+    try:
+        sql_file = Path("queries") / "list_following.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (uid,))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+# 4. Get Reviewed Restaurants by User
+@app.get("/api/users/<int:uid>/reviews")
+def get_user_reviews(uid):
+    try:
+        sql_file = Path("queries") / "list_user_reviews.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (uid,))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
