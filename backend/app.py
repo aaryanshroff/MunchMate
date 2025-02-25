@@ -28,7 +28,9 @@ def get_restaurants():
         types_param = request.args.get("types")
         type_ids = types_param.split(",") if types_param else []
 
-        results = _list_restaurants(search_term, type_ids)
+        city = request.args.get("city", "").strip()
+
+        results = _list_restaurants(search_term, type_ids, city)
 
         return {"data": results}, 200
     except Exception as e:
@@ -37,21 +39,35 @@ def get_restaurants():
 
 
 def _list_restaurants(
-    search_term: str = "", type_ids: list[int] = []
+    search_term: str = "", type_ids: list[int] = [], city: str = ""
 ) -> list[Restaurant]:
-    if len(type_ids) == 0:
+    if len(type_ids) == 0 and city == "":
+        # List and filter are separate queries b/c list uses LEFT JOIN
+        # and filter uses INNER JOIN
         sql_file = Path("queries") / "list_restaurants.sql"
         return db.query_db_from_file(sql_file)
 
-    placeholders = ", ".join(["?"] * len(type_ids))
+    filter_predicates = []
+    query_args = []
+
+    if len(type_ids) > 0:
+        placeholders = ", ".join(["?"] * len(type_ids))
+        filter_predicates.append(f"rta.type_id IN ({placeholders})")
+        query_args.extend(type_ids)
+
+    if city != "":
+        filter_predicates.append(f"city = ?")
+        query_args.append(city)
+
+    where_clause = f"WHERE {filter_predicates[0] if len(filter_predicates) == 1 else ' AND '.join(filter_predicates)}"
 
     sql_file = Path("queries") / "filter_restaurants.sql"
     # NOT SQL injection b/c we only substitute with X number of ?
     # ? substitution is handled by SQLite engine
-    query = sql_file.read_text(encoding="utf-8").format(placeholders=placeholders)
+    query = sql_file.read_text(encoding="utf-8").format(where_clause=where_clause)
     print(query)
 
-    return db.query_db(query, tuple(type_ids))
+    return db.query_db(query, query_args)
 
     # TODO: Fix FTS
     # if search_term:
@@ -92,17 +108,27 @@ def _add_restaurant(
 @app.get("/api/types")
 def get_types():
     try:
-        results = _list_types()
+        sql_file = Path("queries") / "list_types.sql"
+        results = db.query_db_from_file(sql_file)
         return {"data": results}, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
 
-def _list_types() -> list[RestaurantType]:
-    sql_file = Path("queries") / "list_types.sql"
-
-    return db.query_db_from_file(sql_file)
+@app.get("/api/cities")
+def get_cities():
+    try:
+        sql_file = Path("queries") / "list_cities.sql"
+        results = db.query_db_from_file(sql_file)
+        # SQLite rows converted to dicts will lead to a result like
+        # [{"city": "Toronto"}, {"city": "San Francisco"}]
+        # This result is flattened for front-end ease-of-use
+        cities = [row["city"] for row in results]
+        return {"data": cities}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
 
 
 # 1. Get User Profile Details

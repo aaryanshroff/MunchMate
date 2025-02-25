@@ -10,6 +10,6 @@ SELECT r.restaurant_id,
 FROM Restaurants r
     INNER JOIN RestaurantTypeAssignments rta ON r.restaurant_id = rta.restaurant_id
     INNER JOIN RestaurantTypes rt ON rta.type_id = rt.type_id
-WHERE rta.type_id IN ({placeholders}) -- This does not cause SQL injection b/c it is only ever substituted by X number of ?
+{where_clause} -- This does not cause SQL injection b/c it is only ever substituted by `WHERE rta.type_id IN (?, ?, ...)` or `WHERE city = ?`
 GROUP BY r.restaurant_id -- In SQLite, you can use any attribute in SELECT if you GROUP BY a primary key
 ORDER BY r.name;

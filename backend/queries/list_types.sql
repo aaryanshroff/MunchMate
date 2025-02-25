@@ -1,2 +1,3 @@
 SELECT *
-FROM RestaurantTypes;
+FROM RestaurantTypes
+ORDER BY type_name;
