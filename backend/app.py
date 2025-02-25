@@ -58,6 +58,7 @@ def _list_restaurants(
     #     sql_file = Path("queries") / "search_restaurants.sql"
     #     params = (search_term,)
 
+
 @app.get("/api/restaurants/add")
 def add_restaurant():
     try:
@@ -68,30 +69,24 @@ def add_restaurant():
         zip_code = request.args.get("zip_code", "").strip()
         phone = request.args.get("phone", "").strip()
 
-        results = _add_restaurants(name, address, city, state, zip_code, phone)
+        results = _add_restaurant(name, address, city, state, zip_code, phone)
 
         return {"data": results}, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
+
 # TODO @dyasin: Implement me
 def _add_restaurant(
-        name: str = "", address: str = "", city: str = "", state: str = "", zip_code: str = "", phone: str = ""
+    name: str = "",
+    address: str = "",
+    city: str = "",
+    state: str = "",
+    zip_code: str = "",
+    phone: str = "",
 ) -> int:
-    if len(type_ids) == 0:
-        sql_file = Path("queries") / "list_restaurants.sql"
-        return db.query_db_from_file(sql_file)
-
-    placeholders = ", ".join(["?"] * len(type_ids))
-
-    sql_file = Path("queries") / "filter_restaurants.sql"
-    # NOT SQL injection b/c we only substitute with X number of ?
-    # ? substitution is handled by SQLite engine
-    query = sql_file.read_text(encoding="utf-8").format(placeholders=placeholders)
-    print(query)
-
-    return db.query_db(query, tuple(type_ids))
+    raise NotImplementedError("_add_restaurant not yet implemented")
 
 
 @app.get("/api/types")
@@ -109,6 +104,7 @@ def _list_types() -> list[RestaurantType]:
 
     return db.query_db_from_file(sql_file)
 
+
 # 1. Get User Profile Details
 @app.get("/api/users/<int:uid>")
 def get_user_profile(uid):
@@ -124,6 +120,7 @@ def get_user_profile(uid):
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
+
 # 2. Get Followers List
 @app.get("/api/users/<int:uid>/followers")
 def get_user_followers(uid):
@@ -136,6 +133,7 @@ def get_user_followers(uid):
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
+
 # 3. Get Following List
 @app.get("/api/users/<int:uid>/following")
 def get_user_following(uid):
@@ -147,6 +145,7 @@ def get_user_following(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+
 
 # 4. Get Reviewed Restaurants by User
 @app.get("/api/users/<int:uid>/reviews")
