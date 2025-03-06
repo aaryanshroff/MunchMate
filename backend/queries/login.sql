@@ -1,5 +1,7 @@
 -- Guaranteed to return 1 or 0 tuples since username is NOT NULL UNIQUE
-SELECT username,
+SELECT uid,
+    username,
     password_hash
 FROM Users
-WHERE username = ? AND password_hash = ?;
+WHERE username = ?
+    AND password_hash = ?;

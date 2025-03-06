@@ -9,6 +9,11 @@ INSERT INTO Users (uid, username, first_name, last_name, email, password_hash, c
 VALUES (?, ?, ?, ?, ?, ?, ?)
 """
 
+INSERT_LOGIN_ATTEMPTS = """
+INSERT INTO LoginAttempts (uid, time, success)
+VALUES (?, ?, ?)
+"""
+
 INSERT_RESTAURANTS = """
 INSERT INTO Restaurants (restaurant_id, name, address, city, state, zip_code, phone, avg_rating, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -53,6 +58,7 @@ SAMPLE_DATASET = os.path.join( SAMPLE_DB_DIR, "sample_dataset.db" )
 SAMPLE_CSV_DIR = os.path.join( SAMPLE_DB_DIR, "sample_csv_files" )
 
 csv_files = ['sample_users.csv',
+             'sample_login_attempts.csv',
              'sample_restaurants.csv',
              'sample_restaurant_images.csv',
              'sample_restaurant_types.csv',
@@ -64,6 +70,7 @@ for i in range(len(csv_files)):
     csv_files[i] = os.path.join( SAMPLE_CSV_DIR, csv_files[i] )
 
 QUERIES = [INSERT_USERS,
+           INSERT_LOGIN_ATTEMPTS,
            INSERT_RESTAURANTS,
            INSERT_RESTAURANT_IMAGES,
            INSERT_RESTAURANT_TYPES,
