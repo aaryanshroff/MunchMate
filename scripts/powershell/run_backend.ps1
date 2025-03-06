@@ -4,6 +4,9 @@ $ErrorActionPreference = "Stop"
 # Save current directory so we can jump back here after this script finishes
 Push-Location
 
+# Move to directory containing script
+Set-Location -Path $PSScriptRoot
+
 # All paths relative to our backend directory
 Set-Location -Path "..\..\backend"
 
@@ -46,7 +49,7 @@ if ($DB_TYPE -eq "sample") {
 }
 
 # Activate the virtual environment
-. .\.venv\Scripts\Activate.ps1
+. ..\.venv\Scripts\Activate.ps1
 
 # Initialize the backend database
 if ($REINIT_DB -eq "true") {
