@@ -7,7 +7,7 @@ const Navbar = () => {
     let navigate = useNavigate();
     return (
         <div className='navbar bg-body-tertiary px-3 mb-3'>
-            <ul clasName='nav nav-pills'>
+            <ul className='nav nav-pills'>
                 <div onClick={() => navigate('/')} className='btn'>
                     MunchMate
                 </div>

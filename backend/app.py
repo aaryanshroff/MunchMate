@@ -68,16 +68,16 @@ def add_restaurant():
         state = request.args.get("state", "").strip()
         zip_code = request.args.get("zip_code", "").strip()
         phone = request.args.get("phone", "").strip()
+        types = request.args.get("types", "").strip().split(",")
+        images = request.args.get("images", "").strip().split(",")
 
-        results = _add_restaurant(name, address, city, state, zip_code, phone)
+        results = _add_restaurant(name, address, city, state, zip_code, phone, types, images)
 
         return {"data": results}, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
-
-# TODO @dyasin: Implement me
 def _add_restaurant(
     name: str = "",
     address: str = "",
@@ -85,9 +85,35 @@ def _add_restaurant(
     state: str = "",
     zip_code: str = "",
     phone: str = "",
+    types: list[str] = [],
+    images: list[str] = []
 ) -> int:
-    raise NotImplementedError("_add_restaurant not yet implemented")
+    sql_file = Path("queries") / "add_restaurant.sql"
+    add_restaurant_query = sql_file.read_text(encoding="utf-8")
+    print(add_restaurant_query)
 
+    params = (name, address, city, state, zip_code, phone)
+    query_response = db.query_db(add_restaurant_query, params)
+
+    restaurant_id = str( db.query_db("SELECT LAST_INSERT_ROWID()")[0]['LAST_INSERT_ROWID()'] )
+
+    sql_file = Path("queries") / "assign_restaurant_types.sql"
+    assign_types_query = sql_file.read_text(encoding="utf-8")
+    print(assign_types_query)
+
+    for t in types:
+        params = (restaurant_id, t)
+        db.query_db(assign_types_query, params)
+
+    sql_file = Path("queries") / "add_restaurant_images.sql"
+    add_images_query = sql_file.read_text(encoding="utf-8")
+    print(add_images_query)
+
+    for image_url in images:
+        params = (restaurant_id, image_url)
+        db.query_db(add_images_query, params)
+        
+    return query_response 
 
 @app.get("/api/types")
 def get_types():
