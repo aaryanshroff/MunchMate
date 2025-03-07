@@ -9,6 +9,9 @@
 $DB_TYPE = $env:DB_TYPE
 if (-not $DB_TYPE) { $DB_TYPE = "sample" }
 
+# Move to directory containing script
+Set-Location -Path $PSScriptRoot
+
 # Database filepaths
 $MAIN_DB_DIR = "..\..\backend\databases"
 $SAMPLE_DB_DIR = "$MAIN_DB_DIR\sample_db"
