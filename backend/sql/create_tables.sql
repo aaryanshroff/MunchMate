@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS Restaurants (
 CREATE TABLE IF NOT EXISTS RestaurantImages (
   image_id INTEGER PRIMARY KEY,
   restaurant_id INTEGER NOT NULL REFERENCES Restaurants(restaurant_id) ON DELETE CASCADE,
-  image_url TEXT NOT NULL UNIQUE,
+  image_url TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS RestaurantTypes (

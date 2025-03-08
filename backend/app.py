@@ -123,8 +123,8 @@ def _add_restaurant(
 
     sql_file = Path("queries") / "add_restaurant_images.sql"
     add_images_query = sql_file.read_text(encoding="utf-8")
-    print(add_images_query)
 
+    print(images)
     for image_url in images:
         params = (restaurant_id, image_url)
         db.query_db(add_images_query, params)
