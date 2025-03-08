@@ -20,25 +20,18 @@ cd backend
 DB_TYPE="${DB_TYPE:-sample}"
 REINIT_DB="${REINIT_DB:-false}"
 
-# Setup database filepaths
-SAMPLE_DB_DIR="databases/sample_db"
-PROD_DB_DIR="databases/prod_db"
-
-SAMPLE_DB_FILEPATH="$SAMPLE_DB_DIR/sample_dataset.db"
-PROD_DB_FILEPATH="$PROD_DB_DIR/prod_dataset.db"
-
-DB_DIR=""
-export DB_FILEPATH=""
-
-if [ "$DB_TYPE" = "sample" ]; then
-    echo "Using sample database."
-    DB_DIR="$SAMPLE_DB_DIR"
-    export DB_FILEPATH="$SAMPLE_DB_FILEPATH"
-else
-    echo "Using production database."
-    DB_DIR="$PROD_DB_DIR"
-    export DB_FILEPATH="$PROD_DB_FILEPATH"
+if [ "$DB_TYPE" != "sample" ] && [ "$DB_TYPE" != "prod" ]; then
+    echo "ERROR: Env var DB_TYPE expects value sample or prod. Given ${DB_TYPE}"
+    echo "Exiting early..."
+    exit 1
 fi
+
+echo "Using $DB_TYPE database."
+
+# Setup database filepaths
+DB_DIR="databases"
+
+export DB_FILEPATH="${DB_DIR}/${DB_TYPE}_db/${DB_TYPE}_dataset.db"
 
 if [ ! -f .venv/bin/activate ]; then
     echo ".venv not found. Please run setup.sh"
@@ -57,7 +50,7 @@ if [ "$REINIT_DB" ]; then
     fi
 
     echo "Building database schema..."
-    python "$DB_DIR/init_db.py"
+    python "$DB_DIR/init_db.py" "$DB_TYPE"
     if [ $? -ne 0 ]; then
         echo -e "Failed to build database schema!\nWill try to destroy db before exiting!"
         rm "$DB_FILEPATH" 2> /dev/null # If DB DNE it isn't a problem so don't print error msg
@@ -68,7 +61,7 @@ if [ "$REINIT_DB" ]; then
 fi
 
 echo -e "Populating database with data...\n"
-python "$DB_DIR/populate_db.py"
+python "$DB_DIR/populate_db.py" "$DB_TYPE"
 if [ $? -ne 0 ]; then
     echo -e "Failed to populate database!\nWill try to destroy db before exiting!"
     rm "$DB_FILEPATH" 2> /dev/null # If DB DNE it isn't a problem so don't print error msg
