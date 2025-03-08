@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import axios from "axios";
+import ReviewsList from "./ReviewsList.jsx";
 
 function Profile() {
   const { uid } = useParams();
   const [profile, setProfile] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -42,14 +42,6 @@ function Profile() {
           return;
         }
 
-        // Fetch reviews
-        const reviewsResponse = await axios.get(`/api/users/${uid}/reviews`);
-        if (reviewsResponse.status >= 200 && reviewsResponse.status < 300) {
-          setReviews(reviewsResponse.data.data);
-        } else {
-          setError(reviewsResponse.data.error);
-          return;
-        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -108,47 +100,15 @@ function Profile() {
         </div>
       </div>
 
-      <div className="my-4">
-        <h2>Reviewed Restaurants</h2>
-        {reviews.length === 0 ? (
-          <p>No reviews yet.</p>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-hover">
-              <thead className="thead-light">
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Address</th>
-                  <th>City</th>
-                  <th>State</th>
-                  <th>Zip Code</th>
-                  <th>Rating</th>
-                  <th>Review</th>
-                  <th>Reviewed At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reviews.map((review, index) => (
-                  <tr key={index}>
-                    <td>{review.name}</td>
-                    <td>{review.phone}</td>
-                    <td>{review.address}</td>
-                    <td>{review.city}</td>
-                    <td>{review.state}</td>
-                    <td>{review.zip_code}</td>
-                    <td>{review.rating}</td>
-                    <td>{review.review_text}</td>
-                    <td>
-                      {new Date(review.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <ReviewsList
+        title="My Reviews"
+        apiUrl={`/api/users/${uid}/reviews`}
+      />
+
+      <ReviewsList
+        title="Friends' Reviews"
+        apiUrl={`/api/users/${uid}/friends-reviews`}
+      />
     </div>
   );
 }

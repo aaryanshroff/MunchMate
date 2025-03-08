@@ -177,14 +177,29 @@ def get_user_following(uid):
 @app.get("/api/users/<int:uid>/reviews")
 def get_user_reviews(uid):
     try:
-        sql_file = Path("queries") / "list_user_reviews.sql"
+        limit = request.args.get("limit", default=10, type=int)
+        sql_file = Path("queries") / "list_my_reviews.sql"
         query = sql_file.read_text(encoding="utf-8")
-        results = db.query_db(query, (uid,))
+        results = db.query_db(query, (uid, limit))
         return {"data": results}, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-
+    
+@app.get("/api/users/<int:uid>/friends-reviews")
+def get_friends_reviews(uid):
+    try:
+        # Default limit to 10 if not provided, and convert to int.
+        limit = request.args.get("limit", default=10, type=int)
+        # Reads the SQL query from the file.
+        sql_file = Path("queries") / "list_following_reviews.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        # Execute query with current user id and limit as parameters.
+        results = db.query_db(query, (uid, limit))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     app.run(debug=True)
