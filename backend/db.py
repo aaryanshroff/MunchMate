@@ -53,6 +53,11 @@ def query_db(query: str, args=()):
     Query function that combines getting the cursor, executing and fetching the results.
     """
     cur = get_db().execute(query, args)
+
+    # If the query is not a SELECT, commit the changes.
+    if not query.lstrip().upper().startswith("SELECT"):
+        get_db().commit()
+    
     rv = cur.fetchall()
     cur.close()
     return [dict(row) for row in rv]
