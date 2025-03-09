@@ -1,6 +1,7 @@
 import RestaurantTypesSelector from "./RestaurantTypesSelector.jsx";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 
 function Restaurants() {
@@ -14,6 +15,8 @@ function Restaurants() {
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState("");
     const [error, setError] = useState(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchRestaurants() {
@@ -195,6 +198,16 @@ function Restaurants() {
                                 <td className="p-3">{restaurant.state}</td>
                                 <td className="p-3">{restaurant.zip_code}</td>
                                 <td className="p-3">{restaurant.types}</td>
+                                <td className="p-3">
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() =>
+                                        navigate(`/restaurant/${restaurant.restaurant_id}`)
+                                        }
+                                    >
+                                        View Details
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
