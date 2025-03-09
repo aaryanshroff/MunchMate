@@ -226,6 +226,76 @@ def get_friends_reviews(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+    
+@app.get("/api/restaurants/<int:restaurant_id>")
+def get_restaurant_details(restaurant_id):
+    try:
+        sql_file = Path("queries") / "get_restaurant_details.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (restaurant_id,))
+        print(results)
+        if results:
+            return {"data": results[0]}, 200
+        else:
+            return {"error": "Restaurant not found"}, 404
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+@app.get("/api/restaurants/<int:restaurant_id>/my-review")
+def get_my_review(restaurant_id):
+    try:
+        uid = request.args.get("uid", type=int)
+        if uid is None:
+            return {"error": "Missing uid parameter"}, 400
+
+        sql_file = Path("queries") / "get_my_review.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (restaurant_id, uid))
+        if results:
+            return {"data": results[0]}, 200
+        else:
+            return {"data": None}, 200  # No review exists yet.
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+
+@app.post("/api/restaurants/<int:restaurant_id>/review")
+def post_review(restaurant_id):
+    try:
+        data = request.get_json()
+        uid = data.get("uid")
+        rating = data.get("rating")
+        review_text = data.get("review_text", "").strip()
+
+        if not uid or not rating:
+            return {"error": "Missing uid or rating"}, 400
+
+        if len(review_text) > 150:
+            return {"error": "Review must be 150 characters or less"}, 400
+
+        sql_file = Path("queries") / "upsert_review.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        db.query_db(query, (uid, restaurant_id, rating, review_text))
+        # Since our db.query_db now commits non-SELECT queries, no extra commit is needed.
+        return {"message": "Review saved successfully"}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+
+@app.get("/api/restaurants/<int:restaurant_id>/reviews")
+def get_restaurant_reviews(restaurant_id):
+    try:
+        limit = request.args.get("limit", default=10, type=int)
+        sql_file = Path("queries") / "get_restaurant_reviews.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (restaurant_id, limit))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     app.run(debug=True)

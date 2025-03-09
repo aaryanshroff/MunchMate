@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 
 import Layout from "./Layout.jsx";
 import Restaurants from './Restaurants.jsx';
+import RestaurantPage from './RestaurantPage.jsx';
 import AddRestaurantPage from "./AddRestaurantPage.jsx";
 import Profile from "./UserProfile.jsx";
 
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Restaurants />} />
             <Route path="/add-restaurant" element={<AddRestaurantPage />} />
             <Route path="profile/:uid" element={<Profile />} />
+            <Route path="restaurant/:restaurant_id" element={<RestaurantPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
