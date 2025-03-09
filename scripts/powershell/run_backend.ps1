@@ -36,35 +36,36 @@ $SAMPLE_DB_FILEPATH = "$SAMPLE_DB_DIR\sample_dataset.db"
 $PROD_DB_FILEPATH = "$PROD_DB_DIR\prod_dataset.db"
 
 $DB_DIR = ""
-$DB_FILEPATH = ""
+$env:DB_FILEPATH = ""
 
 if ($DB_TYPE -eq "sample") {
     Write-Host "Using sample database."
     $DB_DIR = $SAMPLE_DB_DIR
-    $DB_FILEPATH = $SAMPLE_DB_FILEPATH
-} else {
+    $env:DB_FILEPATH = $SAMPLE_DB_FILEPATH
+}
+else {
     Write-Host "Using production database."
     $DB_DIR = $PROD_DB_DIR
-    $DB_FILEPATH = $PROD_DB_FILEPATH
+    $env:DB_FILEPATH = $PROD_DB_FILEPATH
 }
 
 # Activate the virtual environment
-. ..\.venv\Scripts\Activate.ps1
+. .venv\Scripts\Activate.ps1
 
 # Initialize the backend database
 if ($REINIT_DB -eq "true") {
     Write-Host "Recreating the database from scratch..."
 
-    if (Test-Path $DB_FILEPATH) {
+    if (Test-Path $env:DB_FILEPATH) {
         Write-Host "Database already exists, wiping and recreating it..."
-        Remove-Item $DB_FILEPATH -Force
+        Remove-Item $env:DB_FILEPATH -Force
     }
 
     Write-Host "Building database schema..."
     python "$DB_DIR\init_sample_db.py"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Failed to build database schema! Will try to destroy DB before exiting."
-        Remove-Item $DB_FILEPATH -ErrorAction SilentlyContinue
+        Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue
         deactivate
         Pop-Location
         exit 1
@@ -75,7 +76,7 @@ Write-Host "Populating database with data..."
 python "$DB_DIR\populate_sample_db.py"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to populate database! Will try to destroy DB before exiting."
-    Remove-Item $DB_FILEPATH -ErrorAction SilentlyContinue
+    Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue
     deactivate
     Pop-Location
     exit 1
