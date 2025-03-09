@@ -27,6 +27,7 @@ Ensure you have the following installed:
 
     ```powershell
     # Windows
+    # Set $env:VAR beforehand as needed
     .\scripts\powershell\setup.ps1
     ```
 
