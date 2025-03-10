@@ -157,7 +157,6 @@ def get_cities():
         return {"error": str(e)}, 500
 
 
-# 1. Get User Profile Details
 @app.get("/api/users/<int:uid>")
 def get_user_profile(uid):
     try:
@@ -173,7 +172,6 @@ def get_user_profile(uid):
         return {"error": str(e)}, 500
 
 
-# 2. Get Followers List
 @app.get("/api/users/<int:uid>/followers")
 def get_user_followers(uid):
     try:
@@ -186,7 +184,6 @@ def get_user_followers(uid):
         return {"error": str(e)}, 500
 
 
-# 3. Get Following List
 @app.get("/api/users/<int:uid>/following")
 def get_user_following(uid):
     try:
@@ -199,7 +196,6 @@ def get_user_following(uid):
         return {"error": str(e)}, 500
 
 
-# 4. Get Reviewed Restaurants by User
 @app.get("/api/users/<int:uid>/reviews")
 def get_user_reviews(uid):
     try:
@@ -211,7 +207,8 @@ def get_user_reviews(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-    
+
+
 @app.get("/api/users/<int:uid>/friends-reviews")
 def get_friends_reviews(uid):
     try:
@@ -226,7 +223,8 @@ def get_friends_reviews(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-    
+
+
 @app.get("/api/restaurants/<int:restaurant_id>")
 def get_restaurant_details(restaurant_id):
     try:
@@ -241,6 +239,7 @@ def get_restaurant_details(restaurant_id):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+
 
 @app.get("/api/restaurants/<int:restaurant_id>/my-review")
 def get_my_review(restaurant_id):
@@ -293,6 +292,58 @@ def get_restaurant_reviews(restaurant_id):
         query = sql_file.read_text(encoding="utf-8")
         results = db.query_db(query, (restaurant_id, limit))
         return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+   
+@app.get("/api/users/<int:uid>/is-following")
+def is_following(uid):
+    try:
+        # Expect the current user's id to be passed as a query parameter
+        follower_id = request.args.get("follower_id", type=int)
+        if follower_id is None:
+            return {"error": "Missing follower_id parameter"}, 400
+
+        sql_file = Path("queries") / "get_is_following.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (uid, follower_id))
+        # If any row exists, the current user is following the profile user.
+        return {"data": bool(results)}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+
+@app.post("/api/users/<int:uid>/follow")
+def follow_user(uid):
+    try:
+        data = request.get_json()
+        follower_id = data.get("follower_id")
+        if not follower_id:
+            return {"error": "Missing follower_id in request body"}, 400
+
+        sql_file = Path("queries") / "add_follow.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        db.query_db(query, (uid, follower_id))
+        return {"message": "Followed successfully"}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
+
+@app.delete("/api/users/<int:uid>/unfollow")
+def unfollow_user(uid):
+    try:
+        data = request.get_json()
+        follower_id = data.get("follower_id")
+        if not follower_id:
+            return {"error": "Missing follower_id in request body"}, 400
+
+        sql_file = Path("queries") / "unfollow.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        db.query_db(query, (uid, follower_id))
+        return {"message": "Unfollowed successfully"}, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
