@@ -13,8 +13,23 @@ function Register() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const [isButtonDisabled, setButtonDisabled] = useState(false);
     const navigate = useNavigate();
+    const [userId, setUserId] = useState(
+        parseInt(JSON.parse(localStorage.getItem("userId")))
+    );
+
+    useEffect(() => {
+        localStorage.setItem("userId", JSON.stringify(userId));
+        window.dispatchEvent(new Event("storage"));
+    }, [userId]);
+
+    // Redirect to profile page if user is already logged in
+    useEffect(() => {
+        if (userId) {
+            navigate("/profile/" + userId);
+        }
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,6 +37,12 @@ function Register() {
             ...formData,
             [name]: value,
         });
+    };
+
+    const isValidEmail = (email) => {
+        const VALID_EMAIL_REGEX =
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return VALID_EMAIL_REGEX.test(email);
     };
 
     const isValidInput = () => {
@@ -37,6 +58,11 @@ function Register() {
             return false;
         }
 
+        if (!isValidEmail(formData.email)) {
+            setError("Please enter a valid email address");
+            return false;
+        }
+
         return true;
     };
 
@@ -47,6 +73,18 @@ function Register() {
     const handleSuccessResponseToast = document.getElementById(
         "handleSuccessResponseToast"
     );
+
+    if (handleErrorResponseToast) {
+        handleErrorResponseToast.addEventListener("hidden.bs.toast", () => {
+            setButtonDisabled(false);
+        });
+    }
+    if (handleSuccessResponseToast) {
+        handleSuccessResponseToast.addEventListener("hidden.bs.toast", () => {
+            setButtonDisabled(false);
+            navigate(`/login`);
+        });
+    }
 
     const handleErrorResponseToastBootstrap =
         bootstrap.Toast.getOrCreateInstance(handleErrorResponseToast);
@@ -78,10 +116,12 @@ function Register() {
             }
 
             console.log(response);
+            setButtonDisabled(true);
             handleSuccessResponseToastBootstrap.show();
         } catch (error) {
-            console.error(response.error);
-            setError(error);
+            setButtonDisabled(true);
+            console.error(error);
+            setError(error.response.data.error);
             handleErrorResponseToastBootstrap.show();
         }
     };
@@ -151,7 +191,11 @@ function Register() {
                     />
                 </div>
                 <div className="mb-3 p-1">
-                    <button type="submit" className="btn btn-primary">
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={isButtonDisabled}
+                    >
                         Register
                     </button>
                 </div>
@@ -194,7 +238,10 @@ function Register() {
                                 className="btn-close"
                                 data-bs-dismiss="toast"
                                 aria-label="Close"
-                                onClick={() => navigate("/login")}
+                                onClick={() => {
+                                    setButtonDisabled(false);
+                                    navigate("/login");
+                                }}
                             ></button>
                         </div>
                         <div className="toast-body">Account created!</div>
