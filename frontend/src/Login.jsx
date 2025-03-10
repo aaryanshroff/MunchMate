@@ -1,18 +1,32 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-import { Link, useNavigate } from "react-router";
+import { data, Link, useNavigate } from "react-router";
 
 function Login() {
     const [formData, setFormData] = useState({
         username: "",
         password: "",
     });
+    const [isButtonDisabled, setButtonDisabled] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-
-    const [currentUserId, setCurrentUserId] = useState(0);
     const navigate = useNavigate();
+    const [userId, setUserId] = useState(
+        parseInt(JSON.parse(localStorage.getItem("userId")))
+    );
+
+    useEffect(() => {
+        localStorage.setItem("userId", JSON.stringify(userId));
+        window.dispatchEvent(new Event("storage"));
+    }, [userId]);
+
+    // Redirect to profile page if user is already logged in
+    useEffect(() => {
+        if (userId) {
+            navigate("/profile/" + userId);
+        }
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -46,6 +60,18 @@ function Login() {
         "handleSuccessResponseToast"
     );
 
+    if (handleErrorResponseToast) {
+        handleErrorResponseToast.addEventListener("hidden.bs.toast", () => {
+            setButtonDisabled(false);
+        });
+    }
+    if (handleSuccessResponseToast) {
+        handleSuccessResponseToast.addEventListener("hidden.bs.toast", () => {
+            setButtonDisabled(false);
+            navigate(`/profile/${userId}`);
+        });
+    }
+
     const handleErrorResponseToastBootstrap =
         bootstrap.Toast.getOrCreateInstance(handleErrorResponseToast);
     const handleSuccessResponseToastBootstrap =
@@ -69,6 +95,7 @@ function Login() {
 
             const isOk = response.status >= 200 && response.status < 300;
             if (!isOk) {
+                setUserId(0);
                 console.error(response.error);
                 setError(response.error);
                 handleErrorResponseToastBootstrap.show();
@@ -76,18 +103,16 @@ function Login() {
             }
 
             console.log(response);
+            setButtonDisabled(true);
+            setUserId(response.data.data.uid);
+            console.log(userId);
             handleSuccessResponseToastBootstrap.show();
-
-            // Reset the fields after submission
-            setFormData({
-                username: "",
-                password: "",
-            });
-            console.log(response);
-            setCurrentUserId(response.data.data["uid"]);
         } catch (error) {
-            console.error(response.error);
-            setError(error);
+            setUserId(0);
+            setButtonDisabled(true);
+            console.log(userId);
+            console.error(error);
+            setError(error.response.data.error);
             handleErrorResponseToastBootstrap.show();
         }
     };
@@ -121,7 +146,11 @@ function Login() {
                     />
                 </div>
                 <div className="mb-3 p-1">
-                    <button type="submit" className="btn btn-primary">
+                    <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={isButtonDisabled}
+                    >
                         Login
                     </button>
                 </div>
@@ -142,6 +171,7 @@ function Login() {
                                 className="btn-close"
                                 data-bs-dismiss="toast"
                                 aria-label="Close"
+                                onClick={() => setButtonDisabled(false)}
                             ></button>
                         </div>
                         <div className="toast-body">{error}</div>
@@ -165,9 +195,8 @@ function Login() {
                                 data-bs-dismiss="toast"
                                 aria-label="Close"
                                 onClick={() => {
-                                    if (currentUserId !== 0) {
-                                        navigate(`/profile/${currentUserId}`);
-                                    }
+                                    setButtonDisabled(false);
+                                    navigate(`/profile/${userId}`);
                                 }}
                             ></button>
                         </div>
