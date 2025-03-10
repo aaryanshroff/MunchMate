@@ -358,43 +358,43 @@ def unfollow_user(uid):
 # 5. Attempt login
 @app.post("/api/login")
 def login():
-    try:
-        username = request.form.get("username").strip()
-        password = request.form.get("password")
-        # No salt so that password is one-to-one with hash and we can pass it
-        # into the login query. Sufficiently secure for this project, otherwise use argon2-cffi
-        password_hash = sha256(password.encode()).hexdigest()
+    username = request.form.get("username").strip()
+    password = request.form.get("password")
+    # No salt so that password is one-to-one with hash and we can pass it
+    # into the login query. Sufficiently secure for this project, otherwise use argon2-cffi
+    password_hash = sha256(password.encode()).hexdigest()
 
-        # Check if acct. is locked out
-        lockout_status = db.query_db_from_file(
-            Path("queries") / "get_account_lockout.sql", (username,)
-        )
+    # Check if acct. is locked out
+    lockout_status = db.query_db_from_file(
+        Path("queries") / "get_account_lockout.sql", (username,)
+    )
 
-        if lockout_status[0]["locked_out"]:
-            return {
-                "error": "This account has been locked out. Please try again later."
-            }, 401
+    if lockout_status[0]["locked_out"]:
+        return {
+            "error": "This account has been locked out. Please try again later."
+        }, 401
 
-        # Attempt login
-        results = db.query_db_from_file(
-            Path("queries") / "login.sql", (password_hash, username)
-        )
-        if results:
-            uid = results[0]["uid"]
-            success = results[0]["authenticated"]
-            try:
-                # Record login attempt, continue even if insert fails
-                db.query_db_from_file(
-                    Path("queries") / "add_login_attempt.sql",
-                    (uid, success),
-                )
-            except Exception as e:
-                print(f"{type(e).__name__}({e})")
+    # Attempt login
+    results = db.query_db_from_file(
+        Path("queries") / "login.sql", (password_hash, username)
+    )
+    if results:
+        uid = results[0]["uid"]
+        success = results[0]["authenticated"]
+        try:
+            # Record login attempt, continue even if insert fails
+            db.query_db_from_file(
+                Path("queries") / "add_login_attempt.sql",
+                (uid, success),
+            )
+        except Exception as e:
+            print(f"{type(e).__name__}({e})")
 
-            if results[0]["authenticated"]:
-                return get_user_profile(uid)
+        if results[0]["authenticated"]:
+            return get_user_profile(uid)
 
-        return {"error": "Invalid username or password"}, 401
+    return {"error": "Invalid username or password"}, 401
+
 
 def check_password(pwd: str) -> list[str]:
     issues = []

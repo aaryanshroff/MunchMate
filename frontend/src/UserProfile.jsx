@@ -12,6 +12,8 @@ function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const currentUserId = localStorage.getItem("userId");
+
   useEffect(() => {
     async function fetchProfileData() {
       try {
@@ -61,7 +63,7 @@ function Profile() {
         <div className="my-4">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h1>{profile.username}'s Profile</h1>
-            <FollowButton />
+            {(uid != currentUserId) && <FollowButton />}
           </div>
           <p>
             <strong>Name:</strong> {profile.first_name} {profile.last_name}

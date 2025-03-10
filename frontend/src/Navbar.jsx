@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-// TODO @djhoon24: Integrate currentUserId with the actual logged in userId (we should put this in local storage this when we login to a user)
-
-// TODO @dyasin: Don't display certain buttons if we are not admin
 const Navbar = () => {
     const navigate = useNavigate();
     const [userId, setUserId] = useState(() => {
