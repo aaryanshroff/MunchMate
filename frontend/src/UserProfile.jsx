@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import axios from "axios";
 import ReviewsList from "./ReviewsList.jsx";
+import FollowButton from "./FollowButton.jsx";
 
 function Profile() {
   const { uid } = useParams();
@@ -58,7 +59,10 @@ function Profile() {
     <div className="container">
       {profile && (
         <div className="my-4">
-          <h1>{profile.username}&apos;s Profile</h1>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h1>{profile.username}'s Profile</h1>
+            <FollowButton />
+          </div>
           <p>
             <strong>Name:</strong> {profile.first_name} {profile.last_name}
           </p>
