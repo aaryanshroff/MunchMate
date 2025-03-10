@@ -266,12 +266,21 @@ def register():
         if password_issues:
             return {"error": list(password_issues)}, 400
 
-        db.query_db_from_file(
+        # Print type and value of the variables
+        print(f"username: {type(username)} - {username}")
+        print(f"first_name: {type(first_name)} - {first_name}")
+        print(f"last_name: {type(last_name)} - {last_name}")
+        print(f"email: {type(email)} - {email}")
+        print(f"password_hash: {type(password_hash)} - {password_hash}")
+
+        query_response = db.query_db_from_file(
             Path("queries") / "create_account.sql",
             (username, first_name, last_name, email, password_hash),
         )
 
-        return {}, 201
+        print(query_response)
+
+        return query_response, 201
 
     except Exception as e:
         print(f"{type(e).__name__}({e})")
