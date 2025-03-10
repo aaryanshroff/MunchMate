@@ -4,6 +4,9 @@ $ErrorActionPreference = "Stop"
 # Save current directory so we can jump back here after this script finishes
 Push-Location
 
+# Move to directory containing script
+Set-Location -Path $PSScriptRoot
+
 # All paths relative to our backend directory
 Set-Location -Path "..\..\backend"
 
@@ -36,25 +39,26 @@ Write-Host "Using $DB_TYPE database."
 
 # Setup database filepaths
 $DB_DIR = "databases"
-$DB_FILEPATH = "$DB_DIR\$DB_TYPE`_db\$DB_TYPE`_dataset.db"
+$env:DB_FILEPATH = "$DB_DIR\$DB_TYPE`_db\$DB_TYPE`_dataset.db"
 
 # Activate the virtual environment
-. .\.venv\Scripts\Activate.ps1
+. .venv\Scripts\Activate.ps1
 
 # Initialize the backend database
 if ($REINIT_DB -eq "true") {
     Write-Host "Recreating the database from scratch..."
 
-    if (Test-Path $DB_FILEPATH) {
+    if (Test-Path $env:DB_FILEPATH) {
         Write-Host "Database already exists, wiping and recreating it..."
-        Remove-Item $DB_FILEPATH -Force
+        Remove-Item $env:DB_FILEPATH -Force
     }
 
     Write-Host "Building database schema..."
-    python "$DB_DIR\init_db.py"
+    $INIT_DB = "$DB_DIR\init_db.py"
+    python $INIT_DB $DB_TYPE
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Failed to build database schema! Will try to destroy DB before exiting."
-        Remove-Item $DB_FILEPATH -ErrorAction SilentlyContinue
+        Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue
         deactivate
         Pop-Location
         exit 1
@@ -62,10 +66,11 @@ if ($REINIT_DB -eq "true") {
 }
 
 Write-Host "Populating database with data..."
-python "$DB_DIR\populate_db.py"
+$POPULATE_DB = "$DB_DIR\populate_db.py"
+python $POPULATE_DB $DB_TYPE
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to populate database! Will try to destroy DB before exiting."
-    Remove-Item $DB_FILEPATH -ErrorAction SilentlyContinue
+    Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue
     deactivate
     Pop-Location
     exit 1
