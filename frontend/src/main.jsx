@@ -3,12 +3,18 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
 
 import Layout from "./Layout.jsx";
-import Restaurants from './Restaurants.jsx';
-import RestaurantPage from './RestaurantPage.jsx';
+import Restaurants from "./Restaurants.jsx";
+import RestaurantPage from "./RestaurantPage.jsx";
 import AddRestaurantPage from "./AddRestaurantPage.jsx";
 import Profile from "./UserProfile.jsx";
 import Register from "./Register.jsx";
 import Login from "./Login.jsx";
+
+const storedUserId = JSON.parse(localStorage.getItem("userId"));
+console.log("main.jsx: ", storedUserId);
+if (storedUserId === null) {
+    localStorage.setItem("userId", JSON.stringify(0));
+}
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
@@ -21,7 +27,10 @@ createRoot(document.getElementById("root")).render(
                         path="/add-restaurant"
                         element={<AddRestaurantPage />}
                     />
-                    <Route path="restaurant/:restaurant_id" element={<RestaurantPage />} />
+                    <Route
+                        path="restaurant/:restaurant_id"
+                        element={<RestaurantPage />}
+                    />
                     <Route path="profile/:uid" element={<Profile />} />
                     <Route path="register" element={<Register />} />
                     <Route path="login" element={<Login />} />
