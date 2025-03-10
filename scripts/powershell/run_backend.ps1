@@ -28,26 +28,18 @@ $REINIT_DB = $env:REINIT_DB
 if (-not $DB_TYPE) { $DB_TYPE = "sample" }
 if (-not $REINIT_DB) { $REINIT_DB = "false" }
 
+if ($DB_TYPE -ne "sample" -and $DB_TYPE -ne "prod") {
+    Write-Host "ERROR: Env var DB_TYPE expects value sample or prod. Given $DB_TYPE"
+    Write-Host "Exiting early..."
+    Pop-Location
+    exit 1
+}
+
+Write-Host "Using $DB_TYPE database."
+
 # Setup database filepaths
-$SAMPLE_DB_DIR = "databases\sample_db"
-$PROD_DB_DIR = "databases\prod_db"
-
-$SAMPLE_DB_FILEPATH = "$SAMPLE_DB_DIR\sample_dataset.db"
-$PROD_DB_FILEPATH = "$PROD_DB_DIR\prod_dataset.db"
-
-$DB_DIR = ""
-$env:DB_FILEPATH = ""
-
-if ($DB_TYPE -eq "sample") {
-    Write-Host "Using sample database."
-    $DB_DIR = $SAMPLE_DB_DIR
-    $env:DB_FILEPATH = $SAMPLE_DB_FILEPATH
-}
-else {
-    Write-Host "Using production database."
-    $DB_DIR = $PROD_DB_DIR
-    $env:DB_FILEPATH = $PROD_DB_FILEPATH
-}
+$DB_DIR = "databases"
+$DB_FILEPATH = "$DB_DIR\$DB_TYPE`_db\$DB_TYPE`_dataset.db"
 
 # Activate the virtual environment
 . .venv\Scripts\Activate.ps1
@@ -62,7 +54,7 @@ if ($REINIT_DB -eq "true") {
     }
 
     Write-Host "Building database schema..."
-    python "$DB_DIR\init_sample_db.py"
+    python "$DB_DIR\init_db.py"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Failed to build database schema! Will try to destroy DB before exiting."
         Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue
@@ -73,7 +65,7 @@ if ($REINIT_DB -eq "true") {
 }
 
 Write-Host "Populating database with data..."
-python "$DB_DIR\populate_sample_db.py"
+python "$DB_DIR\populate_db.py"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to populate database! Will try to destroy DB before exiting."
     Remove-Item $env:DB_FILEPATH -ErrorAction SilentlyContinue

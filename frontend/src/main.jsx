@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
 
 import Layout from "./Layout.jsx";
-import Restaurants from "./Restaurants.jsx";
+import Restaurants from './Restaurants.jsx';
+import RestaurantPage from './RestaurantPage.jsx';
 import AddRestaurantPage from "./AddRestaurantPage.jsx";
 import Profile from "./UserProfile.jsx";
 import Register from "./Register.jsx";
@@ -20,6 +21,7 @@ createRoot(document.getElementById("root")).render(
                         path="/add-restaurant"
                         element={<AddRestaurantPage />}
                     />
+                    <Route path="restaurant/:restaurant_id" element={<RestaurantPage />} />
                     <Route path="profile/:uid" element={<Profile />} />
                     <Route path="register" element={<Register />} />
                     <Route path="login" element={<Login />} />

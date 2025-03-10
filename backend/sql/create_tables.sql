@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Users (
   username TEXT NOT NULL UNIQUE,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  email TEXT NOT NULL COLLATE NOCASE,
   password_hash TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS Restaurants (
 
 CREATE TABLE IF NOT EXISTS RestaurantImages (
   image_id INTEGER PRIMARY KEY,
-  restaurant_id INTEGER NOT NULL REFERENCES Restaurants (restaurant_id) ON DELETE CASCADE,
-  image_url TEXT NOT NULL UNIQUE,
+  restaurant_id INTEGER NOT NULL REFERENCES Restaurants(restaurant_id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS Reviews (
 );
 
 CREATE TABLE IF NOT EXISTS Followers (
-  uid INTEGER REFERENCES Users (uid) ON DELETE CASCADE,
-  follower_id INTEGER REFERENCES Users (uid) ON DELETE CASCADE,
-  CHECK (uid <> follower_id),
-  PRIMARY KEY (uid, follower_id)
+  uid INTEGER REFERENCES Users(uid) ON DELETE CASCADE,
+  follower_id INTEGER REFERENCES Users(uid) ON DELETE CASCADE,
+  CHECK(uid <> follower_id),
+  PRIMARY KEY(uid, follower_id)
 );

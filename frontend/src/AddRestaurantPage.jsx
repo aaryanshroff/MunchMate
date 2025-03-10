@@ -17,7 +17,6 @@ function AddRestaurantPage() {
         image3: "",
     });
     const [selectedTypes, setSelectedTypes] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
     const STATE_ACRONYMS = [
@@ -104,7 +103,7 @@ function AddRestaurantPage() {
                     zip_code: formData.zip_code,
                     phone: formData.phone,
                     types: selectedTypes.join(","),
-                    images: imagesStr
+                    images: imagesStr.join(",")
                 },
             });
 
