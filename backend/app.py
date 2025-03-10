@@ -2,6 +2,7 @@ from pathlib import Path
 from hashlib import sha256
 import re
 from typing import Set
+from sqlite3 import IntegrityError
 
 import db
 from flask import Flask, request
@@ -219,7 +220,8 @@ def get_user_reviews(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-    
+
+
 @app.get("/api/users/<int:uid>/friends-reviews")
 def get_friends_reviews(uid):
     try:
@@ -234,7 +236,8 @@ def get_friends_reviews(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-    
+
+
 @app.get("/api/restaurants/<int:restaurant_id>")
 def get_restaurant_details(restaurant_id):
     try:
@@ -249,6 +252,7 @@ def get_restaurant_details(restaurant_id):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+
 
 @app.get("/api/restaurants/<int:restaurant_id>/my-review")
 def get_my_review(restaurant_id):
@@ -305,6 +309,7 @@ def get_restaurant_reviews(restaurant_id):
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
+
 # 5. Attempt login
 @app.post("/api/login")
 def login():
@@ -319,6 +324,7 @@ def login():
         lockout_status = db.query_db_from_file(
             Path("queries") / "get_account_lockout.sql", (username,)
         )
+
         if lockout_status[0]["locked_out"]:
             return {
                 "error": "This account has been locked out. Please try again later."
@@ -326,37 +332,45 @@ def login():
 
         # Attempt login
         results = db.query_db_from_file(
-            Path("queries") / "login.sql", (username, password_hash)
+            Path("queries") / "login.sql", (password_hash, username)
         )
-        # Record login attempt, continue even if insert fails
-        try:
-            db.query_db_from_file(
-                Path("queries") / "add_login_attempt.sql", (username, bool(results))
-            )
-        except Exception as e:
-            print(f"{type(e).__name__}({e})")
-
         if results:
-            return get_user_profile(results[0]["uid"])
-        else:
-            return {"error": "Invalid username or password"}, 401
+            uid = results[0]["uid"]
+            success = results[0]["authenticated"]
+            try:
+                # Record login attempt, continue even if insert fails
+                db.query_db_from_file(
+                    Path("queries") / "add_login_attempt.sql",
+                    (uid, success),
+                )
+            except Exception as e:
+                print(f"{type(e).__name__}({e})")
+
+            if results[0]["authenticated"]:
+                return get_user_profile(uid)
+
+        return {"error": "Invalid username or password"}, 401
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
 
-def check_password(pwd: str) -> Set[str]:
-    issues = set()
+def check_password(pwd: str) -> list[str]:
+    issues = []
     if len(pwd) < 6 or len(pwd) > 50:
-        issues.add("Password must be between 6 and 50 characters long.")
+        issues.append("be between 6 and 50 characters long,")
     if not re.search(r"[a-z]", pwd):
-        issues.add("Password must contain at least one lowercase letter.")
+        issues.append("contain at least one lowercase letter,")
     if not re.search(r"[A-Z]", pwd):
-        issues.add("Password must contain at least one uppercase letter.")
+        issues.append("contain at least one uppercase letter,")
     if not re.search(r"\d", pwd):
-        issues.add("Password must contain at least one digit.")
+        issues.append("contain at least one digit,")
     if not re.search(r"[@$!%*#?&]", pwd):
-        issues.add("Password must contain at least one special character (@$!%*#?&).")
+        issues.append("contain at least one special character (@$!%*#?&),")
+
+    if len(issues) > 0:
+        issues[-1] = issues[-1][:-1] + "."  # Replace trailing comma with period
+        return ["Password must:"] + issues
 
     return issues
 
@@ -375,23 +389,24 @@ def register():
         password_issues = check_password(password)
 
         if password_issues:
-            return {"error": list(password_issues)}, 400
-
-        # Print type and value of the variables
-        print(f"username: {type(username)} - {username}")
-        print(f"first_name: {type(first_name)} - {first_name}")
-        print(f"last_name: {type(last_name)} - {last_name}")
-        print(f"email: {type(email)} - {email}")
-        print(f"password_hash: {type(password_hash)} - {password_hash}")
+            return {"error": [f"{issue}\n" for issue in password_issues]}, 400
 
         query_response = db.query_db_from_file(
             Path("queries") / "create_account.sql",
             (username, first_name, last_name, email, password_hash),
         )
 
-        print(query_response)
-
         return query_response, 201
+
+    except IntegrityError as e:
+        print(f"{type(e).__name__}({e})")
+        error_msg = str(e)
+        if "username" in error_msg:
+            return {"error": "Username already exists"}, 409
+        elif "email" in error_msg:
+            return {"error": "Email already exists"}, 409
+        else:
+            return {"error": str(e)}, 500
 
     except Exception as e:
         print(f"{type(e).__name__}({e})")
