@@ -49,6 +49,27 @@ INSERT_RESTAURANTS_FTS_REBUILD = """
 INSERT INTO restaurants_fts(restaurants_fts) VALUES('rebuild');
 """
 
+# The following 2 queries are to initially set the average rating for restaurants,
+# subsequent updates to the Reviews table will update average ratings through triggers
+CALCULATE_AVG_RATINGS = """
+CREATE TEMP TABLE temp_ratings AS
+SELECT 
+    r.restaurant_id,
+    COALESCE( ROUND( avg( rv.rating ) ), 0 ) AS avg_rating
+FROM Restaurants r
+LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
+GROUP BY r.restaurant_id;
+"""
+
+UPDATE_AVG_RATINGS = """
+UPDATE Restaurants
+SET avg_rating = (
+    SELECT avg_rating
+    FROM temp_ratings tr
+    WHERE tr.restaurant_id = Restaurants.restaurant_id
+);
+"""
+
 if len(sys.argv) != 2:
     print(
         f"FAILED: {sys.argv[0]} expects 2 args DB_TYPE=[sample|prod], received {len(sys.argv)} args"
@@ -109,6 +130,13 @@ try:
 
     # TODO: Fix FTS
     # cursor.execute(INSERT_RESTAURANTS_FTS_REBUILD);
+
+    # Calculates the average rating per restaurant and updates the database with the found values
+    print( "\nDone populating tables, now calculating and setting average rating per restaurant" )
+    print( "This may take a minute..." )
+    cursor.execute( CALCULATE_AVG_RATINGS )
+    cursor.execute( UPDATE_AVG_RATINGS )
+    print( "DONE!" )
 
     conn.commit()
     if conn:
