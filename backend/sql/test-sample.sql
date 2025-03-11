@@ -82,10 +82,12 @@ FROM Restaurants
 WHERE RestaurantTypes.type_name = 'augue';
 
 -- 5. Get average rating of each restaurant
-SELECT restaurant_id,
-  COALESCE(ROUND(AVG(rating)), 0) AS avg_rating
-FROM Reviews
-GROUP BY restaurant_id;
+SELECT 
+    r.restaurant_id,
+    COALESCE( ROUND( avg( rv.rating ) ), 0 ) AS avg_rating
+FROM Restaurants r
+LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
+GROUP BY r.restaurant_id;
 
 -- R9 Create account and login, includes account lockout for multiple failed logins
 -- 1. Create account
