@@ -47,19 +47,7 @@ REINIT_DB:
 Set these BEFORE running the run_backend script to choose between
 production and sample data.
 
-## Sample DB
-
-```bash
-..scripts/{bash|powershell}/run_backend.{sh|ps1}
-```
-Open a new terminal and run:
-```bash
-cd backend/databases/{sample|prod}_db
-sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/test-{sample|prod}.out
-```
-
-### Backend
-Open a new terminal and run:
+## Backend
 ```bash
 # MacOS / Linux
 ./scripts/bash/run_backend.sh
@@ -69,6 +57,7 @@ Open a new terminal and run:
 # Windows
 .\scripts\powershell\run_backend.ps1
 ```
+
 
 ### Frontend
 Open a new terminal and run:
@@ -80,6 +69,14 @@ Open a new terminal and run:
 ```powershell
 # Windows
 .\scripts\powershell\run_frontend.ps1
+```
+
+### Testing database queries
+
+Open a new terminal and run:
+```bash
+cd backend/databases/{sample|prod}_db
+sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/test-{sample|prod}.out
 ```
 
 ## Supported Features
