@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const RestaurantTypesSelector = ({ selectedTypes, setSelectedTypes, error, setError }) => {
+const RestaurantTypesSelector = ({
+    selectedTypes,
+    setSelectedTypes,
+    setError,
+}) => {
     const [types, setTypes] = useState([]);
 
     useEffect(() => {
@@ -48,9 +52,7 @@ const RestaurantTypesSelector = ({ selectedTypes, setSelectedTypes, error, setEr
                                 className="form-check-input"
                                 type="checkbox"
                                 value={type.type_id}
-                                checked={selectedTypes.includes(
-                                    type.type_id
-                                )}
+                                checked={selectedTypes.includes(type.type_id)}
                                 onChange={(e) => {
                                     const typeId = Number(e.target.value);
                                     if (e.target.checked) {
@@ -78,6 +80,6 @@ const RestaurantTypesSelector = ({ selectedTypes, setSelectedTypes, error, setEr
             </ul>
         </div>
     );
-}
+};
 
 export default RestaurantTypesSelector;

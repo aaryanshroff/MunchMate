@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-import { data, Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 function Login() {
     const [formData, setFormData] = useState({
@@ -9,7 +9,6 @@ function Login() {
         password: "",
     });
     const [isButtonDisabled, setButtonDisabled] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const [userId, setUserId] = useState(
@@ -17,8 +16,10 @@ function Login() {
     );
 
     useEffect(() => {
-        localStorage.setItem("userId", JSON.stringify(userId));
-        window.dispatchEvent(new Event("storage"));
+        if (userId) {
+            localStorage.setItem("userId", JSON.stringify(userId));
+            window.dispatchEvent(new Event("storage"));
+        }
     }, [userId]);
 
     // Redirect to profile page if user is already logged in
@@ -95,7 +96,6 @@ function Login() {
 
             const isOk = response.status >= 200 && response.status < 300;
             if (!isOk) {
-                setUserId(0);
                 console.error(response.error);
                 setError(response.error);
                 handleErrorResponseToastBootstrap.show();
@@ -104,11 +104,9 @@ function Login() {
 
             console.log(response);
             setButtonDisabled(true);
-            setUserId(response.data.data.uid);
-            console.log(userId);
+            setUserId(response.data.user_id);
             handleSuccessResponseToastBootstrap.show();
         } catch (error) {
-            setUserId(0);
             setButtonDisabled(true);
             console.log(userId);
             console.error(error);

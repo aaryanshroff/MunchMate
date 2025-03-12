@@ -202,7 +202,9 @@ function Restaurants() {
                                     <button
                                         className="btn btn-primary"
                                         onClick={() =>
-                                        navigate(`/restaurant/${restaurant.restaurant_id}`)
+                                            navigate(
+                                                `/restaurant/${restaurant.restaurant_id}`
+                                            )
                                         }
                                     >
                                         View Details

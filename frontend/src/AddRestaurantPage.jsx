@@ -1,5 +1,5 @@
 import RestaurantTypesSelector from "./RestaurantTypesSelector.jsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 // TODO @dyasin: The toasts need a second to load in, so immediately pressing submit won't show errors.
@@ -9,7 +9,7 @@ function AddRestaurantPage() {
         name: "",
         address: "",
         city: "",
-        state: 'AL',
+        state: "AL",
         zip_code: "",
         phone: "",
         image1: "",
@@ -20,11 +20,56 @@ function AddRestaurantPage() {
     const [error, setError] = useState("");
 
     const STATE_ACRONYMS = [
-      'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 
-      'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 
-      'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 
-      'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 
-      'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
     ];
 
     const handleChange = (e) => {
@@ -41,16 +86,18 @@ function AddRestaurantPage() {
         return VALID_ZIP_CODE_REGEX.test(zip_code);
     };
     const isValidPhone = (phone) => {
-        const VALID_PHONE_REGEX = /^(?:\+1\s?)?(\(\d{3}\)|\d{3})([-\s]?)\d{3}[-\s]?\d{4}$/;
+        const VALID_PHONE_REGEX =
+            /^(?:\+1\s?)?(\(\d{3}\)|\d{3})([-\s]?)\d{3}[-\s]?\d{4}$/;
         return VALID_PHONE_REGEX.test(phone);
     };
 
     const isValidInput = () => {
         const isAllFormDataFilledOut = Object.entries(formData).every(
-            ([key, value]) => { 
-                console.log( key + " " + value );
+            ([key, value]) => {
+                console.log(key + " " + value);
 
-                return key.startsWith("image") || value.trim() !== ""; }
+                return key.startsWith("image") || value.trim() !== "";
+            }
         );
 
         if (!isAllFormDataFilledOut) {
@@ -72,11 +119,17 @@ function AddRestaurantPage() {
     };
 
     // Gives success/error feedback to the user after they try and add a restaurant
-    const handleErrorResponseToast = document.getElementById('handleErrorResponseToast')
-    const handleSuccessResponseToast = document.getElementById('handleSuccessResponseToast')
+    const handleErrorResponseToast = document.getElementById(
+        "handleErrorResponseToast"
+    );
+    const handleSuccessResponseToast = document.getElementById(
+        "handleSuccessResponseToast"
+    );
 
-    const handleErrorResponseToastBootstrap = bootstrap.Toast.getOrCreateInstance(handleErrorResponseToast)
-    const handleSuccessResponseToastBootstrap = bootstrap.Toast.getOrCreateInstance(handleSuccessResponseToast)
+    const handleErrorResponseToastBootstrap =
+        bootstrap.Toast.getOrCreateInstance(handleErrorResponseToast);
+    const handleSuccessResponseToastBootstrap =
+        bootstrap.Toast.getOrCreateInstance(handleSuccessResponseToast);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -85,14 +138,20 @@ function AddRestaurantPage() {
             handleErrorResponseToastBootstrap.show();
             return;
         }
-        
-        let response = ""
+
+        let response = "";
 
         try {
             // Creates a commma separated string where empty strings are ignored.
-            const imagesStr = (formData.image1 + "," + formData.image2 + "," + formData.image3)
+            const imagesStr = (
+                formData.image1 +
+                "," +
+                formData.image2 +
+                "," +
+                formData.image3
+            )
                 .split(",")
-                .filter(image => image.trim() !== "");
+                .filter((image) => image.trim() !== "");
 
             response = await axios.get("/api/restaurants/add", {
                 params: {
@@ -103,7 +162,7 @@ function AddRestaurantPage() {
                     zip_code: formData.zip_code,
                     phone: formData.phone,
                     types: selectedTypes.join(","),
-                    images: imagesStr.join(",")
+                    images: imagesStr.join(","),
                 },
             });
 
@@ -123,7 +182,7 @@ function AddRestaurantPage() {
                 name: "",
                 address: "",
                 city: "",
-                state: 'AL',
+                state: "AL",
                 zip_code: "",
                 phone: "",
                 image1: "",
@@ -177,16 +236,22 @@ function AddRestaurantPage() {
                 />
             </div>
             <div className="input-group mb-3 p-1">
-              <label className="input-group-text" htmlFor="state">State</label>
-              <select className="form-select" id="state" name="state" value={formData.state} onChange={handleChange}>
-                {
-                    STATE_ACRONYMS.map((state, index) => (
+                <label className="input-group-text" htmlFor="state">
+                    State
+                </label>
+                <select
+                    className="form-select"
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                >
+                    {STATE_ACRONYMS.map((state, index) => (
                         <option key={index} value={state}>
-                          {state}
+                            {state}
                         </option>
-                      ))
-                }
-              </select>
+                    ))}
+                </select>
             </div>
             <div className="p-1">
                 <label htmlFor="zip_code">Zip Code</label>
@@ -221,7 +286,9 @@ function AddRestaurantPage() {
                 />
             </div>
             <div className="p-1">
-                <label htmlFor="image1">Optionally upload up to 3 image URLs</label>
+                <label htmlFor="image1">
+                    Optionally upload up to 3 image URLs
+                </label>
                 <input
                     type="text"
                     id="image1"
@@ -263,26 +330,46 @@ function AddRestaurantPage() {
                 </button>
             </div>
             <div className="toast-container position-fixed top-0 start-50 translate-middle-x">
-              <div id="handleErrorResponseToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div className="toast-header">
-                  <strong className="me-auto text-danger">ERROR</strong>
-                  <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                <div
+                    id="handleErrorResponseToast"
+                    className="toast"
+                    role="alert"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                >
+                    <div className="toast-header">
+                        <strong className="me-auto text-danger">ERROR</strong>
+                        <button
+                            type="button"
+                            className="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div className="toast-body">{error}</div>
                 </div>
-                <div className="toast-body">
-                    {error} 
-                </div>
-              </div>
             </div>
             <div className="toast-container position-fixed top-0 start-50 translate-middle-x">
-              <div id="handleSuccessResponseToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div className="toast-header">
-                  <strong className="me-auto text-success">SUCCESS</strong>
-                  <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                <div
+                    id="handleSuccessResponseToast"
+                    className="toast"
+                    role="alert"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                >
+                    <div className="toast-header">
+                        <strong className="me-auto text-success">
+                            SUCCESS
+                        </strong>
+                        <button
+                            type="button"
+                            className="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div className="toast-body">Restaurant added!</div>
                 </div>
-                <div className="toast-body">
-                    Restaurant added!
-                </div>
-              </div>
             </div>
         </form>
     );

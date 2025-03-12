@@ -11,7 +11,6 @@ function Register() {
         email: "",
         password: "",
     });
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [isButtonDisabled, setButtonDisabled] = useState(false);
     const navigate = useNavigate();
@@ -20,8 +19,10 @@ function Register() {
     );
 
     useEffect(() => {
-        localStorage.setItem("userId", JSON.stringify(userId));
-        window.dispatchEvent(new Event("storage"));
+        if (userId) {
+            localStorage.setItem("userId", JSON.stringify(userId));
+            window.dispatchEvent(new Event("storage"));
+        }
     }, [userId]);
 
     // Redirect to profile page if user is already logged in
@@ -116,6 +117,7 @@ function Register() {
             }
 
             console.log(response);
+            setUserId(response.data.user_id);
             setButtonDisabled(true);
             handleSuccessResponseToastBootstrap.show();
         } catch (error) {
