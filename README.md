@@ -33,16 +33,29 @@ Ensure you have the following installed:
 
 ## Running the Application
 
-### Sample DB
+There are 2 environment variables used in setting up the database:
+
+DB_TYPE: 
+    desc:        use production database or sample?
+    valid input: { "sample", "prod" }
+    defaults:    "sample"
+REINIT_DB:
+    desc:        if database exists, should it be reinitialized?
+    valid input: Boolean
+    defaults:    "false"
+
+Set these BEFORE running the run_backend script to choose between
+production and sample data.
+
+## Sample DB
 
 ```bash
-cd scripts/bash
-./run_backend.sh
+..scripts/{bash|powershell}/run_backend.{sh|ps1}
 ```
 Open a new terminal and run:
 ```bash
-cd backend/databases/sample_db
-sqlite3 sample_dataset.db < ../../sql/test-sample.sql > ../../sql/test-sample.out
+cd backend/databases/{sample|prod}_db
+sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/test-{sample|prod}.out
 ```
 
 ### Backend
