@@ -391,7 +391,7 @@ def login():
             print(f"{type(e).__name__}({e})")
 
         if results[0]["authenticated"]:
-            return get_user_profile(uid)
+            return {"user_id": uid}, 201
 
     return {"error": "Invalid username or password"}, 401
 
@@ -436,7 +436,11 @@ def register():
             (username, first_name, last_name, email, password_hash),
         )
 
-        return query_response, 201
+        user_id = str(
+            db.query_db("SELECT LAST_INSERT_ROWID()")[0]["LAST_INSERT_ROWID()"]
+        )
+
+        return {"response": query_response, "user_id": user_id}, 201
 
     except IntegrityError as e:
         print(f"{type(e).__name__}({e})")
@@ -447,7 +451,21 @@ def register():
             return {"error": "Email already exists"}, 409
         else:
             return {"error": str(e)}, 500
-
+        
+@app.get("/api/users/search")
+def search_users():
+    try:
+        # Get the search query from the URL query parameters
+        search_query = request.args.get("query", "").strip()
+        # Wrap with wildcards for a partial match
+        query_param = f"%{search_query}%"
+        sql_file = Path("queries") / "search_users.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        results = db.query_db(query, (query_param,))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     app.run(debug=True)

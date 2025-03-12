@@ -9,12 +9,7 @@ import AddRestaurantPage from "./AddRestaurantPage.jsx";
 import Profile from "./UserProfile.jsx";
 import Register from "./Register.jsx";
 import Login from "./Login.jsx";
-
-const storedUserId = JSON.parse(localStorage.getItem("userId"));
-console.log("main.jsx: ", storedUserId);
-if (storedUserId === null) {
-    localStorage.setItem("userId", JSON.stringify(0));
-}
+import UserSearchPage from "./UserSearchPage.jsx";
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
@@ -34,6 +29,7 @@ createRoot(document.getElementById("root")).render(
                     <Route path="profile/:uid" element={<Profile />} />
                     <Route path="register" element={<Register />} />
                     <Route path="login" element={<Login />} />
+                    <Route path="users/search" element={<UserSearchPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>
