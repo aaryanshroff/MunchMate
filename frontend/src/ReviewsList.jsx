@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router";
 
 function ReviewsList({ title, apiUrl }) {
     const [limit, setLimit] = useState(10);
@@ -59,7 +60,10 @@ function ReviewsList({ title, apiUrl }) {
                         </h5>
                     )}
                     <p>
-                        <strong>Restaurant:</strong> {review.name}
+                        <strong>Restaurant:</strong>{" "}
+                        <Link to={`/restaurant/${review.restaurant_id}`}>
+                            {review.name}
+                        </Link>
                     </p>
                     <p>
                         <strong>Review:</strong> {review.review_text}

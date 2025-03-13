@@ -15,7 +15,6 @@ const RestaurantTypesSelector = ({
 
                 const isOk = response.status >= 200 && response.status < 300;
                 if (!isOk) {
-                    // `error` field defined by the backend
                     setError(response.error);
                     return;
                 }

@@ -347,7 +347,7 @@ def unfollow_user(uid):
         if not follower_id:
             return {"error": "Missing follower_id in request body"}, 400
 
-        sql_file = Path("queries") / "unfollow.sql"
+        sql_file = Path("queries") / "remove_follow.sql"
         query = sql_file.read_text(encoding="utf-8")
         db.query_db(query, (uid, follower_id))
         return {"message": "Unfollowed successfully"}, 200

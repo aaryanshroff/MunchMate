@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import axios from "axios";
 
-function FollowButton() {
-    // Get the profile user's id from the URL (this is the user being viewed)
+function FollowButton({ onFollowChange }) {
     const { uid } = useParams();
-    // Assume the current user id is stored in localStorage (adjust as needed)
     const currentUserId = localStorage.getItem("userId");
 
     const [isFollowing, setIsFollowing] = useState(false);
@@ -52,6 +50,7 @@ function FollowButton() {
                 );
                 if (response.status >= 200 && response.status < 300) {
                     setIsFollowing(false);
+                    onFollowChange();
                 } else {
                     setError(response.data.error);
                 }
@@ -62,6 +61,7 @@ function FollowButton() {
                 });
                 if (response.status >= 200 && response.status < 300) {
                     setIsFollowing(true);
+                    onFollowChange();
                 } else {
                     setError(response.data.error);
                 }
@@ -73,7 +73,6 @@ function FollowButton() {
         }
     };
 
-    // If there's no current user, you might not show the button at all.
     if (!currentUserId) return null;
 
     return (

@@ -14,11 +14,11 @@ function RestaurantPage() {
     const [reviewText, setReviewText] = useState("");
     const [submitError, setSubmitError] = useState(null);
     const [submitSuccess, setSubmitSuccess] = useState(null);
+    const [editMode, setEditMode] = useState(false);
     const [reviewsLimit, setReviewsLimit] = useState(10);
     const [restaurantReviews, setRestaurantReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
 
-    // Assume current user id is stored in localStorage.
     const currentUserId = localStorage.getItem("userId");
 
     useEffect(() => {
@@ -53,7 +53,6 @@ function RestaurantPage() {
                 );
                 if (response.status >= 200 && response.status < 300) {
                     setMyReview(response.data.data);
-                    // If a review exists, prefill the fields (optional)
                     if (response.data.data) {
                         setRating(response.data.data.rating);
                         setReviewText(response.data.data.review_text);
@@ -110,14 +109,13 @@ function RestaurantPage() {
             );
             if (response.status >= 200 && response.status < 300) {
                 setSubmitSuccess("Review saved successfully!");
-                // Update myReview state with the submitted review
                 setMyReview({
                     uid: currentUserId,
                     rating,
                     review_text: reviewText,
                     created_at: new Date().toISOString(),
                 });
-                // Optionally, refresh the reviews list
+                setEditMode(false);
             } else {
                 setSubmitError(response.data.error);
             }
@@ -174,7 +172,7 @@ function RestaurantPage() {
                     <h2>Your Review</h2>
                     {currentUserId ? (
                         <>
-                            {myReview ? (
+                            {myReview && !editMode ? (
                                 <div className="card p-3 mb-3">
                                     <h5>
                                         Your Review (Posted on{" "}
@@ -191,6 +189,12 @@ function RestaurantPage() {
                                         <strong>Review:</strong>{" "}
                                         {myReview.review_text}
                                     </p>
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={() => setEditMode(true)}
+                                    >
+                                        Edit Review
+                                    </button>
                                 </div>
                             ) : (
                                 <form onSubmit={handleReviewSubmit}>
@@ -248,9 +252,24 @@ function RestaurantPage() {
                                     )}
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
+                                        className="btn btn-primary me-2"
                                     >
-                                        Submit Review
+                                        Save Review
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            if (myReview) {
+                                                setRating(myReview.rating);
+                                                setReviewText(
+                                                    myReview.review_text
+                                                );
+                                            }
+                                            setEditMode(false);
+                                        }}
+                                    >
+                                        Cancel
                                     </button>
                                 </form>
                             )}
@@ -276,9 +295,9 @@ function RestaurantPage() {
                             }
                             style={{ width: "150px" }}
                         >
-                            <option value={10}>Top 10</option>
-                            <option value={20}>Top 20</option>
-                            <option value={50}>Top 50</option>
+                            <option value={10}>Last 10</option>
+                            <option value={20}>Last 20</option>
+                            <option value={50}>Last 50</option>
                         </select>
                     </div>
                     {reviewsLoading && <p>Loading reviews...</p>}
