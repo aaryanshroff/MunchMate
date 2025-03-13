@@ -159,9 +159,6 @@ function Restaurants() {
                                 Name
                             </th>
                             <th scope="col" className="p-3">
-                                Phone
-                            </th>
-                            <th scope="col" className="p-3">
                                 Address
                             </th>
                             <th scope="col" className="p-3">
@@ -194,7 +191,6 @@ function Restaurants() {
                                 >
                                     {restaurant.name}
                                 </th>
-                                <td className="p-3">{restaurant.phone}</td>
                                 <td className="p-3">{restaurant.address}</td>
                                 <td className="p-3">{restaurant.city}</td>
                                 <td className="p-3">{restaurant.state}</td>

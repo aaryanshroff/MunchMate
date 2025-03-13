@@ -1,0 +1,30 @@
+=== GROUP 17 ===
+MunchMate | CS 348 | March 14 2025
+
+--- Aaryan Shroff ---
+Tasks:
+- R7: SQL query for querying restaurants by search term (Status: Completed)
+- R16: Member.txt (Status: Completed)
+- C1: README (Status: Completed)
+- C3: SQL Queries and Output for Sample dataset (Status: Completed)
+- C4: SQL Queries and Output for Production dataset (Status: In Progress)
+
+--- Diyar Ayad Yasin ---
+Tasks:
+- R3: Sample Dataset writeup and population script (Status: Completed)
+- R4: Production Dataset writeup and population script (Status: Completed)
+- R6: FE for Add Restaurants Page (Status: Completed)
+- R8: Average Review for Restaurants (Status: In Progress)
+
+--- Kevin Nguyen-Chau ---
+Tasks:
+- C2: SQL queries to create tables and constraints (Status: Completed)
+- R9: SQL query for account creation and login (Status: In progress)
+
+--- DongHoon Jeong ---
+Tasks:
+- R1, R2: High Level Description and System Decisions Writeups (Status: Completed)
+- R5: Schema Design and E/R diagrams (Status: Completed)
+- R6: Restaurant Details & Reviews Functionality (Status: Completed)
+- R6: BE for Add Restaurant (Status: Completed)
+- R10: Profile Page & Follow Functionality (Status: Completed)
