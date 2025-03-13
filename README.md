@@ -44,6 +44,12 @@ REINIT_DB:
     valid input: Boolean
     defaults:    "false"
 
+Set these values through the following in terminal:
+```
+export DB_TYPE=prod
+export REINIT_DB=true
+```
+
 Set these BEFORE running the run_backend script to choose between
 production and sample data.
 
@@ -72,6 +78,7 @@ Open a new terminal and run:
 ```
 
 ### Testing database queries
+NOTE: Must run run_backend script BEFORE this section.
 
 Open a new terminal and run:
 ```bash
