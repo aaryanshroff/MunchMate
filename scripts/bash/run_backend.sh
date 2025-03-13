@@ -41,8 +41,13 @@ fi
 source .venv/bin/activate
 
 # Initalize the backend database
-if [ "$REINIT_DB" ]; then
-    echo "Recreating the database from scratch..."
+if [ "$REINIT_DB" == "true" ] || [ ! -e "$DB_FILEPATH" ]; then
+
+    if [ ! -e "$DB_FILEPATH" ]; then
+        echo -e "$DB_FILEPATH does not exist, creating it..."
+    else
+        echo "Recreating the database from scratch..."
+    fi
 
     if [ -f "$DB_FILEPATH" ]; then
         echo "Database already exists, wiping and recreating it..."
@@ -58,18 +63,19 @@ if [ "$REINIT_DB" ]; then
         exit 1
     fi
 
-fi
+    echo -e "Populating database with data...\n"
+    python "$DB_DIR/populate_db.py" "$DB_TYPE"
+    if [ $? -ne 0 ]; then
+        echo -e "Failed to populate database!\nWill try to destroy db before exiting!"
+        rm "$DB_FILEPATH" 2> /dev/null # If DB DNE it isn't a problem so don't print error msg
+        deactivate
+        exit 1
+    fi
 
-echo -e "Populating database with data...\n"
-python "$DB_DIR/populate_db.py" "$DB_TYPE"
-if [ $? -ne 0 ]; then
-    echo -e "Failed to populate database!\nWill try to destroy db before exiting!"
-    rm "$DB_FILEPATH" 2> /dev/null # If DB DNE it isn't a problem so don't print error msg
-    deactivate
-    exit 1
+    echo -e "\nSuccessfully initialized database!\n"
+else
+    echo -e "$DB_FILEPATH exists and REINIT_DB set to $REINIT_DB\nUsing existing DB!\n"
 fi
-
-echo -e "\nSuccessfully initialized database!\n"
 
 
 echo "Starting Flask backend..."

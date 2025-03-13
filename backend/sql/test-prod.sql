@@ -44,6 +44,14 @@ FROM Reviews
 WHERE restaurant_id = 1587
   AND uid = 1;
 
+-- R8 Average reviews functionality
+SELECT 
+    r.restaurant_id,
+    COALESCE( ROUND( avg( rv.rating ), 1 ), 0 ) AS avg_rating
+FROM Restaurants r
+LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
+GROUP BY r.restaurant_id;
+
 -- R10 Profile Page and Follow Functionality
 -- Search for specific username like abc
 SELECT 
