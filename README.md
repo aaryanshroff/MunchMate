@@ -45,9 +45,16 @@ REINIT_DB:
     defaults:    "false"
 
 Set these values however you'd like through the following commands in a terminal:
+```bash
+# MacOS / Linux
+export DB_TYPE=prod
+export REINIT_DB=true
 ```
-export DB_TYPE=sample
-export REINIT_DB=false
+
+```powershell
+# Windows
+$env:DB_TYPE="prod"
+$env:REINIT_DB="true"
 ```
 
 Set these BEFORE running the run_backend script to choose between
