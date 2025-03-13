@@ -157,3 +157,55 @@ SELECT uid,
 FROM Users
 WHERE username = 'KevinIsCool'
   AND password_hash = '8inGIJogZE+su8Trdm1FcGXnyoLUu80vZhp8lv6LM64';
+
+-- R10 Profile Page and Follow Functionality
+-- Search for specific username like abc
+SELECT 
+    uid, 
+    username, 
+    first_name, 
+    last_name, 
+    email, 
+    created_at
+FROM Users
+WHERE username LIKE '%land%';
+
+-- Get Profile Details of User with UID 2
+SELECT uid, username, first_name, last_name, email, created_at
+FROM Users
+WHERE uid = 2;
+
+-- List Following of User with UID 2
+SELECT u.uid, u.username, u.first_name, u.last_name
+FROM Followers f
+JOIN Users u ON f.uid = u.uid
+WHERE f.follower_id = 2;
+
+-- List 3 most recent reviews of User with UID 2
+SELECT r.restaurant_id, r.name, r.address, r.city, r.state, r.zip_code, r.phone,
+       rev.rating, rev.review_text, rev.created_at
+FROM Reviews rev
+JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
+WHERE rev.uid = 2
+ORDER BY rev.created_at DESC
+LIMIT 3;
+
+-- List 3 most recent reviews from following of User with UID 2
+SELECT 
+    r.restaurant_id, 
+    r.name,
+    rev.uid AS review_uid, 
+    rev.rating, 
+    rev.review_text, 
+    rev.created_at,
+    u.username, 
+    u.first_name, 
+    u.last_name
+FROM Reviews rev
+JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
+JOIN Users u ON rev.uid = u.uid
+WHERE rev.uid IN (
+    SELECT uid FROM Followers WHERE follower_id = 2
+)
+ORDER BY rev.created_at DESC
+LIMIT 3;
