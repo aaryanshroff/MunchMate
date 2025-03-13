@@ -1,5 +1,4 @@
 import RestaurantTypesSelector from "./RestaurantTypesSelector.jsx";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -177,6 +176,9 @@ function Restaurants() {
                             <th scope="col" className="p-3">
                                 Type
                             </th>
+                            <th scope="col" className="p-3">
+                                Details
+                            </th>
                         </tr>
                     </thead>
 
@@ -197,7 +199,17 @@ function Restaurants() {
                                 <td className="p-3">{restaurant.city}</td>
                                 <td className="p-3">{restaurant.state}</td>
                                 <td className="p-3">{restaurant.zip_code}</td>
-                                <td className="p-3">{restaurant.types}</td>
+                                <td
+                                    className="p-3"
+                                    style={{
+                                        maxWidth: "150px",
+                                        overflow: "hidden",
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                    }}
+                                >
+                                    {restaurant.types}
+                                </td>
                                 <td className="p-3">
                                     <button
                                         className="btn btn-primary"

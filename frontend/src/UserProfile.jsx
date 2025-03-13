@@ -11,6 +11,7 @@ function Profile() {
     const [following, setFollowing] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [refresh, setRefresh] = useState(0);
 
     const currentUserId = localStorage.getItem("userId");
 
@@ -18,7 +19,6 @@ function Profile() {
         async function fetchProfileData() {
             try {
                 setIsLoading(true);
-                // Fetch basic profile details
                 const profileResponse = await axios.get(`/api/users/${uid}`);
                 if (
                     profileResponse.status >= 200 &&
@@ -30,7 +30,6 @@ function Profile() {
                     return;
                 }
 
-                // Fetch followers
                 const followersResponse = await axios.get(
                     `/api/users/${uid}/followers`
                 );
@@ -44,7 +43,6 @@ function Profile() {
                     return;
                 }
 
-                // Fetch following
                 const followingResponse = await axios.get(
                     `/api/users/${uid}/following`
                 );
@@ -64,7 +62,11 @@ function Profile() {
             }
         }
         fetchProfileData();
-    }, [uid]);
+    }, [uid, refresh]);
+
+    const handleFollowChange = () => {
+        setRefresh((prev) => prev + 1);
+    };
 
     if (isLoading) return <p>Loading...</p>;
     if (error) return <div className="alert alert-danger">{error}</div>;
@@ -75,7 +77,9 @@ function Profile() {
                 <div className="my-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <h1>{profile.username}'s Profile</h1>
-                        {uid != currentUserId && <FollowButton />}
+                        {uid !== currentUserId && (
+                            <FollowButton onFollowChange={handleFollowChange} />
+                        )}
                     </div>
                     <p>
                         <strong>Name:</strong> {profile.first_name}{" "}
@@ -105,7 +109,6 @@ function Profile() {
                         ))}
                     </ul>
                 </div>
-
                 <div className="col-md-6">
                     <h2>Following</h2>
                     <ul className="list-group">
@@ -125,7 +128,6 @@ function Profile() {
                 title="My Reviews"
                 apiUrl={`/api/users/${uid}/reviews`}
             />
-
             <ReviewsList
                 title="Friends' Reviews"
                 apiUrl={`/api/users/${uid}/friends-reviews`}

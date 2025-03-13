@@ -9,7 +9,6 @@ function UserSearchPage() {
     const [results, setResults] = useState([]);
     const [error, setError] = useState(null);
 
-    // Function to perform the search
     const handleSearch = async () => {
         try {
             const response = await axios.get("/api/users/search", {
@@ -25,7 +24,6 @@ function UserSearchPage() {
         }
     };
 
-    // If there's an initial query from the URL, fetch results on mount
     useEffect(() => {
         if (initialQuery) {
             handleSearch();
