@@ -44,10 +44,10 @@ REINIT_DB:
     valid input: Boolean
     defaults:    "false"
 
-Set these values through the following in terminal:
+Set these values however you'd like through the following commands in a terminal:
 ```
-export DB_TYPE=prod
-export REINIT_DB=true
+export DB_TYPE=sample
+export REINIT_DB=false
 ```
 
 Set these BEFORE running the run_backend script to choose between
