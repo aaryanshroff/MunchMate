@@ -1,12 +1,16 @@
-import RestaurantTypesSelector from "./RestaurantTypesSelector.jsx";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useNavigate } from "react-router";
+import RestaurantTypesSelector from "./RestaurantTypesSelector.jsx";
 
 function Restaurants() {
     // TODO: Different error and isLoading state for restaurants vs types
     const [searchTerm, setSearchTerm] = useState("");
     const [restaurants, setRestaurants] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [totalRestaurants, setTotalRestaurants] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     // types fetched and set in RestaurantTypeSelector component
@@ -16,29 +20,29 @@ function Restaurants() {
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
+    const perPage = 20; // Items per page
 
+    // Fetch restaurants with infinite scroll
     useEffect(() => {
         async function fetchRestaurants() {
             try {
                 setIsLoading(true);
-
                 const response = await axios.get("/api/restaurants", {
                     params: {
                         q: searchTerm,
                         types: selectedTypes.join(","),
                         city: selectedCity,
+                        page: page,
+                        per_page: perPage,
                     },
                 });
 
-                const isOk = response.status >= 200 && response.status < 300;
-                if (!isOk) {
-                    // `error` field defined by the backend
-                    setError(response.error);
-                    return;
-                }
+                const { data: newRestaurants } = response.data;
 
-                const { data } = response.data;
-                setRestaurants(data);
+                setRestaurants((prev) =>
+                    page === 1 ? newRestaurants : [...prev, ...newRestaurants]
+                );
+                setHasMore(newRestaurants.length === perPage);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -47,6 +51,12 @@ function Restaurants() {
         }
 
         fetchRestaurants();
+    }, [searchTerm, selectedTypes, selectedCity, page]);
+
+    useEffect(() => {
+        setPage(1);
+        setRestaurants([]);
+        setHasMore(true);
     }, [searchTerm, selectedTypes, selectedCity]);
 
     // TODO: @aaryanshroff loading spinner inside of dropdown menu for cities and types
@@ -71,6 +81,7 @@ function Restaurants() {
                 // }
                 const { data } = response.data;
                 setCities(data);
+                setHasMore(true);
             } catch (error) {
                 setError(error.message);
             }
@@ -148,81 +159,98 @@ function Restaurants() {
                 />
             </div>
 
-            {isLoading && <p>Loading...</p>}
+            {/* {isLoading && <p>Loading...</p>} */}
             {error && <div className="alert alert-danger">{error}</div>}
 
-            <div className="table-responsive">
-                <table className="table table-hover">
-                    <thead className="thead-light">
-                        <tr>
-                            <th scope="col" className="p-3">
-                                Name
-                            </th>
-                            <th scope="col" className="p-3">
-                                Address
-                            </th>
-                            <th scope="col" className="p-3">
-                                City
-                            </th>
-                            <th scope="col" className="p-3">
-                                State
-                            </th>
-                            <th scope="col" className="p-3">
-                                Zip Code
-                            </th>
-                            <th scope="col" className="p-3">
-                                Type
-                            </th>
-                            <th scope="col" className="p-3">
-                                Details
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {restaurants.map((restaurant, index) => (
-                            <tr
-                                key={restaurant.restaurant_id || index}
-                                className="border-bottom"
-                            >
-                                <th
-                                    scope="row"
-                                    className="font-weight-bold text-nowrap p-3"
-                                >
-                                    {restaurant.name}
+            <InfiniteScroll
+                dataLength={restaurants.length}
+                next={() => setPage((prev) => prev + 1)}
+                hasMore={hasMore}
+                loader={
+                    <div className="text-center p-3">
+                        Loading more restaurants...
+                    </div>
+                }
+                endMessage={
+                    <p className="text-center p-3">
+                        {restaurants.length > 0
+                            ? "No more restaurants to show"
+                            : "No restaurants found"}
+                    </p>
+                }
+            >
+                <div className="table-responsive">
+                    <table className="table table-hover">
+                        <thead className="thead-light">
+                            <tr>
+                                <th scope="col" className="p-3">
+                                    Name
                                 </th>
-                                <td className="p-3">{restaurant.address}</td>
-                                <td className="p-3">{restaurant.city}</td>
-                                <td className="p-3">{restaurant.state}</td>
-                                <td className="p-3">{restaurant.zip_code}</td>
-                                <td
-                                    className="p-3"
-                                    style={{
-                                        maxWidth: "150px",
-                                        overflow: "hidden",
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
-                                    }}
-                                >
-                                    {restaurant.types}
-                                </td>
-                                <td className="p-3">
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() =>
-                                            navigate(
-                                                `/restaurant/${restaurant.restaurant_id}`
-                                            )
-                                        }
-                                    >
-                                        View Details
-                                    </button>
-                                </td>
+                                <th scope="col" className="p-3">
+                                    Address
+                                </th>
+                                <th scope="col" className="p-3">
+                                    City
+                                </th>
+                                <th scope="col" className="p-3">
+                                    State
+                                </th>
+                                <th scope="col" className="p-3">
+                                    Zip Code
+                                </th>
+                                <th scope="col" className="p-3">
+                                    Type
+                                </th>
+                                <th scope="col" className="p-3">
+                                    Details
+                                </th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+
+                        <tbody>
+                            {restaurants.map((restaurant, index) => (
+                                <tr
+                                    key={restaurant.restaurant_id}
+                                    className="border-bottom"
+                                >
+                                    <td className=" p-3">{restaurant.name}</td>
+                                    <td className="p-3">
+                                        {restaurant.address}
+                                    </td>
+                                    <td className="p-3">{restaurant.city}</td>
+                                    <td className="p-3">{restaurant.state}</td>
+                                    <td className="p-3">
+                                        {restaurant.zip_code}
+                                    </td>
+                                    <td
+                                        className="p-3"
+                                        style={{
+                                            maxWidth: "150px",
+                                            overflow: "hidden",
+                                            whiteSpace: "nowrap",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {restaurant.types}
+                                    </td>
+                                    <td className="p-3">
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/restaurant/${restaurant.restaurant_id}`
+                                                )
+                                            }
+                                        >
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </InfiniteScroll>
         </div>
     );
 }
