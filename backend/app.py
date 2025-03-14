@@ -32,23 +32,36 @@ def get_restaurants():
         type_ids = types_param.split(",") if types_param else []
 
         city = request.args.get("city", "").strip()
+        page = request.args.get("page", default=1, type=int)
+        page = max(1, page)  # Ensure page is at least 1
+        per_page = request.args.get("per_page", default=20, type=int)
+        per_page = max(1, min(per_page, 100))  # Clamp per_page between 1 and 100
 
-        results = _list_restaurants(search_term, type_ids, city)
+        results, total = _list_restaurants(search_term, type_ids, city, page, per_page)
+        print("results", results)
+        print("total", total)
 
-        return {"data": results}, 200
+        return {
+            "data": results,
+            "total": total,
+        }, 200
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
 
 def _list_restaurants(
-    search_term: str = "", type_ids: list[int] = [], city: str = ""
-) -> list[Restaurant]:
-    if len(type_ids) == 0 and city == "":
-        # List and filter are separate queries b/c list uses LEFT JOIN
-        # and filter uses INNER JOIN
-        sql_file = Path("queries") / "list_restaurants.sql"
-        return db.query_db_from_file(sql_file)
+    search_term: str = "",
+    type_ids: list[int] = [],
+    city: str = "",
+    page: int = 1,
+    per_page: int = 20,
+) -> tuple[list[Restaurant], int]:
+    # if len(type_ids) == 0 and city == "":
+    #     # List and filter are separate queries b/c list uses LEFT JOIN
+    #     # and filter uses INNER JOIN
+    #     sql_file = Path("queries") / "list_restaurants.sql"
+    #     return db.query_db_from_file(sql_file)
 
     filter_predicates = []
     query_args = []
@@ -62,15 +75,33 @@ def _list_restaurants(
         filter_predicates.append(f"city = ?")
         query_args.append(city)
 
-    where_clause = f"WHERE {filter_predicates[0] if len(filter_predicates) == 1 else ' AND '.join(filter_predicates)}"
+    where_clause = ""
+    if filter_predicates:
+        where_clause = f"WHERE {filter_predicates[0] if len(filter_predicates) == 1 else ' AND '.join(filter_predicates)}"
 
     sql_file = Path("queries") / "filter_restaurants.sql"
     # NOT SQL injection b/c we only substitute with X number of ?
     # ? substitution is handled by SQLite engine
-    query = sql_file.read_text(encoding="utf-8").format(where_clause=where_clause)
-    print(query)
+    filter_query = sql_file.read_text(encoding="utf-8").format(
+        where_clause=where_clause
+    )
+    print("filter_query", filter_query)
 
-    return db.query_db(query, query_args)
+    count_query = (
+        (Path("queries") / "count_restaurant_filter_results.sql")
+        .read_text(encoding="utf-8")
+        .format(filter_query=filter_query)
+    )
+    total = db.query_db(count_query, query_args)[0]["total"]
+
+    paginated_query = filter_query + " LIMIT ? OFFSET ?"
+    offset = (page - 1) * per_page
+    paginated_query_args = query_args + [per_page, offset]
+    print(paginated_query)
+    results = db.query_db(paginated_query, paginated_query_args)
+
+    print(results)
+    return results, total
 
     # TODO: Fix FTS
     # if search_term:
@@ -304,7 +335,8 @@ def get_restaurant_reviews(restaurant_id):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-      
+
+
 @app.get("/api/users/<int:uid>/is-following")
 def is_following(uid):
     try:
@@ -321,6 +353,7 @@ def is_following(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+
 
 @app.post("/api/users/<int:uid>/follow")
 def follow_user(uid):
@@ -354,7 +387,8 @@ def unfollow_user(uid):
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
-      
+
+
 # 5. Attempt login
 @app.post("/api/login")
 def login():
@@ -415,6 +449,7 @@ def check_password(pwd: str) -> list[str]:
 
     return issues
 
+
 # 6. Register new account
 @app.post("/api/register")
 def register():
@@ -451,7 +486,8 @@ def register():
             return {"error": "Email already exists"}, 409
         else:
             return {"error": str(e)}, 500
-        
+
+
 @app.get("/api/users/search")
 def search_users():
     try:
@@ -466,6 +502,7 @@ def search_users():
     except Exception as e:
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
