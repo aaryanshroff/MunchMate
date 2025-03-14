@@ -10,6 +10,7 @@ function Register() {
         last_name: "",
         email: "",
         password: "",
+        confirm_password: "",
     });
     const [error, setError] = useState("");
     const [isButtonDisabled, setButtonDisabled] = useState(false);
@@ -46,6 +47,10 @@ function Register() {
         return VALID_EMAIL_REGEX.test(email);
     };
 
+    const isPasswordMatching = (password, confirm_password) => {
+        return password == confirm_password;
+    };
+
     const isValidInput = () => {
         const isAllFormDataFilledOut = Object.entries(formData).every(
             ([key, value]) => {
@@ -61,6 +66,11 @@ function Register() {
 
         if (!isValidEmail(formData.email)) {
             setError("Please enter a valid email address");
+            return false;
+        }
+
+        if (!isPasswordMatching(formData.password, formData.confirm_password)) {
+            setError("Please enter matching passwords");
             return false;
         }
 
@@ -183,11 +193,23 @@ function Register() {
                 <div className="p-1">
                     <label htmlFor="password">Password</label>
                     <input
-                        type="text"
+                        type="password"
                         id="password"
                         name="password"
                         className="form-control"
                         value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="p-1">
+                    <label htmlFor="confirm_password">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        className="form-control"
+                        value={formData.confirm_password}
                         onChange={handleChange}
                         required
                     />
