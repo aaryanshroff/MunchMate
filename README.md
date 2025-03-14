@@ -97,4 +97,64 @@ sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/
 
 ### Basic Features
 
+- **R6 - Add Restaurants and Reviews**
+    - Frontend:
+        - frontend/src/AddRestaurantPage.jsx
+        - frontend/src/RestaurantPage.jsx
+        - frontend/src/ReviewsList.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/queries/add_restaurant.sql
+        - backend/queries/add_restaurant_images.sql
+        - backend/queries/assign_restaurant_types.sql
+        - backend/queries/get_restaurant_details.sql
+        - backend/queries/get_restaurant_reviews.sql
+        - backend/queries/get_my_review.sql
+        - backend/queries/upsert_review.sql
+
 - **R7 - List all restaurants**
+    - Frontend:
+        - frontend/src/Restaurants.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/queries/list_restaurants.sql
+        - backend/queries/list_cities.sql
+        - backend/queries/list_types.sql
+        - backend/queries/filter_restaurants.sql
+
+- **R8 - Average review of a restaurant**
+    - Frontend:
+        - frontend/src/RestaurantPage.jsx
+    - Backend Endpoints / SQL Query:
+        - backend/app.py
+        - backend/queries/get_average_reviews.sql
+
+- **R9 - Login Functionality**
+    - Frontend:
+        - frontend/src/Register.jsx
+        - frontend/src/Login.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/queries/login.sql
+        - backend/queries/add_login_attempt.sql
+        - backend/queries/create_account.sql
+        - backend/queries/get_account_lockout.sql
+
+- **R10 - User Profile & Follow Functionality**
+    - Frontend:
+        - frontend/src/UserProfile.jsx
+        - frontend/src/UserSearchPage.jsx
+        - frontend/src/FollowButton.jsx
+    - Backend Endpoints / SQL Query:
+        - backend/app.py
+        - backend/queries/search_users.sql
+        - backend/queries/remove_follow.sql
+        - backend/queries/add_follow.sql
+        - backend/queries/list_my_reviews.sql
+        - backend/queries/list_following.sql
+        - backend/queries/list_following_reviews.sql
+        - backend/queries/list_followers.sql
+        - backend/queries/get_user_profile.sql
+
+### Advanced Features
+
