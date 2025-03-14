@@ -45,61 +45,140 @@ WHERE restaurant_id = 1587
   AND uid = 1;
 
 -- R8 Average reviews functionality
-SELECT 
-    r.restaurant_id,
-    COALESCE( ROUND( avg( rv.rating ), 1 ), 0 ) AS avg_rating
+SELECT r.restaurant_id,
+  COALESCE(ROUND(avg(rv.rating), 1), 0) AS avg_rating
 FROM Restaurants r
-LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
+  LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
 GROUP BY r.restaurant_id;
+
+-- R9 Create account and login, with account lockout for multiple failed logins
+-- 1. Create account
+INSERT INTO Users (
+    username,
+    first_name,
+    last_name,
+    email,
+    password_hash
+  )
+VALUES (
+    'KevinIsCool',
+    'Kevin',
+    'Nguyen',
+    'asteroid.destroyer@gmail.com',
+    '97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6'
+  );
+
+-- 2. Login
+-- Guaranteed to return 1 or 0 tuples since username is NOT NULL UNIQUE
+SELECT uid,
+  password_hash = '97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6' AS authenticated
+FROM Users
+WHERE username = 'KevinIsCool';
+
+/*
+ 3. Check account lockout. 
+ Accounts are locked out for 30 minutes if the last 3 failed login attempts occurred within 5 minutes of each other.
+ Accounts with less than 3 failed login attempts are not locked out.
+ */
+SELECT
+  /*
+   Return TRUE if all of the following are true. FALSE otherwise
+   1. The last 3 failed login attempts within 40 minutes (2400 secs) occurred in a span of 5 minutes (300 secs)
+   2. It has been less than or equal to 30 minutes (1600 secs) since the last failed login attempt
+   */
+  (
+    COUNT(*) = 3
+    AND MAX(UNIXEPOCH(TIME)) - MIN(UNIXEPOCH(TIME)) <= 300
+    AND UNIXEPOCH(CURRENT_TIMESTAMP) - MAX(UNIXEPOCH(TIME)) <= 1600
+  ) AS locked_out
+FROM
+  /* Subquery returns last 3 failed attempts */
+  (
+    SELECT time,
+      success
+    FROM LoginAttempts
+    WHERE uid = (
+        SELECT uid
+        FROM Users
+        WHERE username = 'KevinIsCool'
+      )
+      AND time > UNIXEPOCH(CURRENT_TIMESTAMP) - 2400
+      AND success = FALSE
+    ORDER BY time DESC
+    LIMIT 3
+  );
+
+/*
+ 4. Record login attempt. Login attempts are only recorded 
+ when a valid username is provided by the user and the account is not locked out.
+ */
+INSERT INTO LoginAttempts (uid, success)
+VALUES (1001, 1);
 
 -- R10 Profile Page and Follow Functionality
 -- Search for specific username like abc
-SELECT 
-    uid, 
-    username, 
-    first_name, 
-    last_name, 
-    email, 
-    created_at
+SELECT uid,
+  username,
+  first_name,
+  last_name,
+  email,
+  created_at
 FROM Users
 WHERE username LIKE '%joe%';
 
 -- Get Profile Details of User with UID 913
-SELECT uid, username, first_name, last_name, email, created_at
+SELECT uid,
+  username,
+  first_name,
+  last_name,
+  email,
+  created_at
 FROM Users
 WHERE uid = 913;
 
 -- List Following of User with UID 913
-SELECT u.uid, u.username, u.first_name, u.last_name
+SELECT u.uid,
+  u.username,
+  u.first_name,
+  u.last_name
 FROM Followers f
-JOIN Users u ON f.uid = u.uid
+  JOIN Users u ON f.uid = u.uid
 WHERE f.follower_id = 913;
 
 -- List 3 most recent reviews of User with UID 913
-SELECT r.restaurant_id, r.name, r.address, r.city, r.state, r.zip_code, r.phone,
-       rev.rating, rev.review_text, rev.created_at
+SELECT r.restaurant_id,
+  r.name,
+  r.address,
+  r.city,
+  r.state,
+  r.zip_code,
+  r.phone,
+  rev.rating,
+  rev.review_text,
+  rev.created_at
 FROM Reviews rev
-JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
+  JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
 WHERE rev.uid = 913
 ORDER BY rev.created_at DESC
 LIMIT 3;
 
 -- List 3 most recent reviews from following of User with UID 913
-SELECT 
-    r.restaurant_id, 
-    r.name,
-    rev.uid AS review_uid, 
-    rev.rating, 
-    rev.review_text, 
-    rev.created_at,
-    u.username, 
-    u.first_name, 
-    u.last_name
+SELECT r.restaurant_id,
+  r.name,
+  rev.uid AS review_uid,
+  rev.rating,
+  rev.review_text,
+  rev.created_at,
+  u.username,
+  u.first_name,
+  u.last_name
 FROM Reviews rev
-JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
-JOIN Users u ON rev.uid = u.uid
+  JOIN Restaurants r ON rev.restaurant_id = r.restaurant_id
+  JOIN Users u ON rev.uid = u.uid
 WHERE rev.uid IN (
-    SELECT uid FROM Followers WHERE follower_id = 913
-)
+    SELECT uid
+    FROM Followers
+    WHERE follower_id = 913
+  )
 ORDER BY rev.created_at DESC
 LIMIT 3;
