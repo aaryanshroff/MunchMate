@@ -9,6 +9,7 @@ function Restaurants() {
     const [searchTerm, setSearchTerm] = useState("");
     const [restaurants, setRestaurants] = useState([]);
     const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
     const [totalRestaurants, setTotalRestaurants] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -19,46 +20,44 @@ function Restaurants() {
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
+    const perPage = 20; // Items per page
 
-    async function fetchRestaurants(page) {
-        try {
-            const response = await axios.get("/api/restaurants", {
-                params: {
-                    q: searchTerm,
-                    types: selectedTypes.join(","),
-                    city: selectedCity,
-                    page: page,
-                },
-            });
+    // Fetch restaurants with infinite scroll
+    useEffect(() => {
+        async function fetchRestaurants() {
+            try {
+                setIsLoading(true);
+                const response = await axios.get("/api/restaurants", {
+                    params: {
+                        q: searchTerm,
+                        types: selectedTypes.join(","),
+                        city: selectedCity,
+                        page: page,
+                        per_page: perPage,
+                    },
+                });
 
-            const isOk = response.status >= 200 && response.status < 300;
-            if (!isOk) {
-                // `error` field defined by the backend
-                console.error(error);
-                return;
+                const { data: newRestaurants } = response.data;
+
+                setRestaurants((prev) =>
+                    page === 1 ? newRestaurants : [...prev, ...newRestaurants]
+                );
+                setHasMore(newRestaurants.length === perPage);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
             }
-
-            const { data, total } = response.data;
-            setRestaurants((prevRestaurants) =>
-                page === 1 ? data : [...prevRestaurants, ...data]
-            );
-            page === 1 && setTotalRestaurants(total);
-        } catch (error) {
-            console.error(error);
         }
-    }
+
+        fetchRestaurants();
+    }, [searchTerm, selectedTypes, selectedCity, page]);
 
     useEffect(() => {
-        fetchRestaurants(1);
+        setPage(1);
+        setRestaurants([]);
+        setHasMore(true);
     }, [searchTerm, selectedTypes, selectedCity]);
-
-    function handleLoadMoreRestaurants() {
-        setPage((prevPage) => {
-            const nextPage = prevPage + 1;
-            fetchRestaurants(nextPage);
-            return nextPage;
-        });
-    }
 
     // TODO: @aaryanshroff loading spinner inside of dropdown menu for cities and types
     useEffect(() => {
@@ -82,6 +81,7 @@ function Restaurants() {
                 // }
                 const { data } = response.data;
                 setCities(data);
+                setHasMore(true);
             } catch (error) {
                 setError(error.message);
             }
@@ -164,10 +164,20 @@ function Restaurants() {
 
             <InfiniteScroll
                 dataLength={restaurants.length}
-                next={handleLoadMoreRestaurants}
-                hasMore={totalRestaurants > restaurants.length}
-                loader={<p>Loading...</p>}
-                endMessage={<p>No more restaurants to load.</p>}
+                next={() => setPage((prev) => prev + 1)}
+                hasMore={hasMore}
+                loader={
+                    <div className="text-center p-3">
+                        Loading more restaurants...
+                    </div>
+                }
+                endMessage={
+                    <p className="text-center p-3">
+                        {restaurants.length > 0
+                            ? "No more restaurants to show"
+                            : "No restaurants found"}
+                    </p>
+                }
             >
                 <div className="table-responsive">
                     <table className="table table-hover">
