@@ -134,7 +134,7 @@ function Login() {
                 <div className="p-1">
                     <label htmlFor="password">Password</label>
                     <input
-                        type="text"
+                        type="password"
                         id="password"
                         name="password"
                         className="form-control"
