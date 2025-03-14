@@ -3,7 +3,18 @@ MunchMate | CS 348 | March 14 2025
 
 --- Aaryan Shroff ---
 Tasks:
-- R7: SQL query for querying restaurants by search term (Status: Completed)
+- R7 (list and basic filters): 
+    - Upgrade filter SQL query to allow filter by city and **ANY number of cuisines** (Status: Completed)
+    - Implement back end logic for extracting filter options from URL params and 
+      interpolating filter options into SQL query.
+    - Build front end components (radio and multi-select dropdowns) for filtering.
+    - Integrate front end with back end API to fetch and display filtered results.
+- R11 (pagination):
+    - Added server-side pagination using SQL LIMIT and OFFSET to filter query
+    - Implement back end logic for calculating pagination page and offset and interpolate
+      into SQL query
+    - Build infinite scroll functionality on front end to incrementally fetch pages of restaurants 
+      from backend 
 - R16: Member.txt (Status: Completed)
 - C1: README (Status: Completed)
 - C3: SQL Queries and Output for Sample dataset (Status: Completed)
