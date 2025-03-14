@@ -25,11 +25,10 @@ Ensure you have the following installed:
     ./scripts/bash/setup.sh
     ```
 
-    ```powershell
-    # Windows
-    # Set $env:VAR beforehand as needed
-    .\scripts\powershell\setup.ps1
-    ```
+   ```powershell
+   # Windows
+   .\scripts\powershell\setup.ps1
+   ```
 
 ## Running the Application
 
