@@ -1,7 +1,6 @@
 from pathlib import Path
 from hashlib import sha256
 import re
-from typing import Set
 from sqlite3 import IntegrityError
 
 import db
