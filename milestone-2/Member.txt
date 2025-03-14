@@ -19,7 +19,7 @@ Tasks:
 --- Kevin Nguyen-Chau ---
 Tasks:
 - C2: SQL queries to create tables and constraints (Status: Completed)
-- R9: SQL query for account creation and login (Status: In progress)
+- R9: Account creation, login, and account lockout functionality (Status: Completed)
 
 --- DongHoon Jeong ---
 Tasks:
