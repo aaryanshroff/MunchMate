@@ -32,19 +32,24 @@ FROM Reviews
 WHERE restaurant_id = 1587
 ORDER BY created_at DESC
 LIMIT 10;
+-- to minimize output file size
 -- Finding the user uid=1's reviews for a restaurant with restaurant_id = 1587:
 SELECT rating,
   review_text,
   created_at
 FROM Reviews
 WHERE restaurant_id = 1587
-  AND uid = 1;
+  AND uid = 1
+LIMIT 10;
+-- to minimize output file size
 -- R8 Average reviews functionality
 SELECT r.restaurant_id,
   COALESCE(ROUND(avg(rv.rating), 1), 0) AS avg_rating
 FROM Restaurants r
   LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
-GROUP BY r.restaurant_id;
+GROUP BY r.restaurant_id
+LIMIT 10;
+-- to minimize output file size
 -- R9 Create account and login, with account lockout for multiple failed logins
 -- 1. Create account
 INSERT INTO Users (
@@ -66,7 +71,9 @@ VALUES (
 SELECT uid,
   password_hash = '97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6' AS authenticated
 FROM Users
-WHERE username = 'KevinIsCool';
+WHERE username = 'KevinIsCool'
+LIMIT 10;
+-- to minimize output file size
 /*
  3. Check account lockout. 
  Accounts are locked out for 30 minutes if the last 3 failed login attempts occurred within 5 minutes of each other.
@@ -98,7 +105,9 @@ FROM
       AND success = FALSE
     ORDER BY time DESC
     LIMIT 3
-  );
+  )
+LIMIT 10;
+-- to minimize output file size
 /*
  4. Record login attempt. Login attempts are only recorded 
  when a valid username is provided by the user and the account is not locked out.
@@ -114,7 +123,9 @@ SELECT uid,
   email,
   created_at
 FROM Users
-WHERE username LIKE '%joe%';
+WHERE username LIKE '%joe%'
+LIMIT 10;
+-- to minimize output file size
 -- Get Profile Details of User with UID 913
 SELECT uid,
   username,
@@ -123,7 +134,9 @@ SELECT uid,
   email,
   created_at
 FROM Users
-WHERE uid = 913;
+WHERE uid = 913
+LIMIT 10;
+-- to minimize output file size
 -- List Following of User with UID 913
 SELECT u.uid,
   u.username,
@@ -131,7 +144,9 @@ SELECT u.uid,
   u.last_name
 FROM Followers f
   JOIN Users u ON f.uid = u.uid
-WHERE f.follower_id = 913;
+WHERE f.follower_id = 913
+LIMIT 10;
+-- to minimize output file size
 -- List 3 most recent reviews of User with UID 913
 SELECT r.restaurant_id,
   r.name,
@@ -178,14 +193,18 @@ SELECT restaurant_id,
   zip_code,
   phone
 FROM Restaurants
-ORDER BY name;
+ORDER BY name
+LIMIT 10;
+-- to minmize output file size
 -- 2. Generate filter options
 SELECT DISTINCT (city)
 FROM Restaurants
 ORDER BY city;
 SELECT DISTINCT (type_name)
 FROM RestaurantTypes
-ORDER BY type_name;
+ORDER BY type_name
+LIMIT 10;
+-- to minimize output file size
 -- 3. Filter restaurants by a city and any number of cuisines
 SELECT r.restaurant_id,
   r.name,
@@ -199,6 +218,8 @@ FROM Restaurants r
   INNER JOIN RestaurantTypeAssignments rta ON r.restaurant_id = rta.restaurant_id
   INNER JOIN RestaurantTypes rt ON rta.type_id = rt.type_id
 WHERE r.city = 'Edmonton'
-  AND rta.type_name IN ('Pizza', 'Chinese')
+  AND rt.type_name IN ('Pizza', 'Chinese')
 GROUP BY r.restaurant_id -- In SQLite, you can use any attribute in SELECT if you GROUP BY a primary key
 ORDER BY r.name
+LIMIT 10;
+-- to minimize output file size
