@@ -18,14 +18,11 @@ VALUES (
     '111-111-1111',
     0.0
   );
-
 INSERT INTO RestaurantImages (image_id, restaurant_id, image_url)
 VALUES (999, 1, 'image_url');
-
 -- Adding a Review Query
 INSERT INTO Reviews (uid, restaurant_id, rating, review_text)
 VALUES (1, 1587, 5, 'great store');
-
 -- Finding 10 most recent reviews for a Restaurant Query to show on the page with restaurant_id = 1587:
 SELECT uid,
   rating,
@@ -35,7 +32,6 @@ FROM Reviews
 WHERE restaurant_id = 1587
 ORDER BY created_at DESC
 LIMIT 10;
-
 -- Finding the user uid=1's reviews for a restaurant with restaurant_id = 1587:
 SELECT rating,
   review_text,
@@ -43,14 +39,12 @@ SELECT rating,
 FROM Reviews
 WHERE restaurant_id = 1587
   AND uid = 1;
-
 -- R8 Average reviews functionality
 SELECT r.restaurant_id,
   COALESCE(ROUND(avg(rv.rating), 1), 0) AS avg_rating
 FROM Restaurants r
   LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
 GROUP BY r.restaurant_id;
-
 -- R9 Create account and login, with account lockout for multiple failed logins
 -- 1. Create account
 INSERT INTO Users (
@@ -67,14 +61,12 @@ VALUES (
     'asteroid.destroyer@gmail.com',
     '97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6'
   );
-
 -- 2. Login
 -- Guaranteed to return 1 or 0 tuples since username is NOT NULL UNIQUE
 SELECT uid,
   password_hash = '97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6' AS authenticated
 FROM Users
 WHERE username = 'KevinIsCool';
-
 /*
  3. Check account lockout. 
  Accounts are locked out for 30 minutes if the last 3 failed login attempts occurred within 5 minutes of each other.
@@ -107,14 +99,12 @@ FROM
     ORDER BY time DESC
     LIMIT 3
   );
-
 /*
  4. Record login attempt. Login attempts are only recorded 
  when a valid username is provided by the user and the account is not locked out.
  */
 INSERT INTO LoginAttempts (uid, success)
 VALUES (1001, 1);
-
 -- R10 Profile Page and Follow Functionality
 -- Search for specific username like abc
 SELECT uid,
@@ -125,7 +115,6 @@ SELECT uid,
   created_at
 FROM Users
 WHERE username LIKE '%joe%';
-
 -- Get Profile Details of User with UID 913
 SELECT uid,
   username,
@@ -135,7 +124,6 @@ SELECT uid,
   created_at
 FROM Users
 WHERE uid = 913;
-
 -- List Following of User with UID 913
 SELECT u.uid,
   u.username,
@@ -144,7 +132,6 @@ SELECT u.uid,
 FROM Followers f
   JOIN Users u ON f.uid = u.uid
 WHERE f.follower_id = 913;
-
 -- List 3 most recent reviews of User with UID 913
 SELECT r.restaurant_id,
   r.name,
@@ -161,7 +148,6 @@ FROM Reviews rev
 WHERE rev.uid = 913
 ORDER BY rev.created_at DESC
 LIMIT 3;
-
 -- List 3 most recent reviews from following of User with UID 913
 SELECT r.restaurant_id,
   r.name,
@@ -182,3 +168,37 @@ WHERE rev.uid IN (
   )
 ORDER BY rev.created_at DESC
 LIMIT 3;
+-- R7 List all restaurants and filter restaurants by city and type (Aaryan)
+-- 1. List all restaurants
+SELECT restaurant_id,
+  name,
+  address,
+  city,
+  state,
+  zip_code,
+  phone
+FROM Restaurants
+ORDER BY name;
+-- 2. Generate filter options
+SELECT DISTINCT (city)
+FROM Restaurants
+ORDER BY city;
+SELECT DISTINCT (type_name)
+FROM RestaurantTypes
+ORDER BY type_name;
+-- 3. Filter restaurants by a city and any number of cuisines
+SELECT r.restaurant_id,
+  r.name,
+  r.address,
+  r.city,
+  r.state,
+  r.zip_code,
+  r.phone,
+  GROUP_CONCAT(rt.type_name) AS types
+FROM Restaurants r
+  INNER JOIN RestaurantTypeAssignments rta ON r.restaurant_id = rta.restaurant_id
+  INNER JOIN RestaurantTypes rt ON rta.type_id = rt.type_id
+WHERE r.city = 'Edmonton'
+  AND rta.type_name IN ('Pizza', 'Chinese')
+GROUP BY r.restaurant_id -- In SQLite, you can use any attribute in SELECT if you GROUP BY a primary key
+ORDER BY r.name
