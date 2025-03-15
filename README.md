@@ -1,5 +1,15 @@
 # MunchMate: CS 348 Group 17 Project
 
+## Milestone 2
+
+### Run prod DB test queries
+
+```bash
+$ DB_TYPE=prod REINIT_DB=true ./scripts/bash/run_backend.sh
+$ cd backend/databases/prod_db
+$ sqlite3 prod_dataset.db < ../../sql/test-sample.sql > ../../sql/test-sample.out
+```
+
 ## Prerequisites
 
 Ensure you have the following installed:
