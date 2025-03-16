@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS Restaurants (
       avg_rating BETWEEN 1 AND 5
     )
   ),
+  num_of_reviews INTEGER NOT NULL DEFAULT 0 CHECK ( num_of_reviews >= 0 ),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (name, address)
 );

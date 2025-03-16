@@ -25,7 +25,7 @@ Tasks:
 - R3: Sample Dataset writeup and population script (Status: Completed)
 - R4: Production Dataset writeup and population script (Status: Completed)
 - R6: FE for Add Restaurants Page (Status: Completed)
-- R8: Average Review for Restaurants (Status: In Progress)
+- R8: Average Review for Restaurants (Status: Completed)
 
 --- Kevin Nguyen-Chau ---
 Tasks:
