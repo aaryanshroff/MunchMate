@@ -15,8 +15,8 @@ VALUES (?, ?, ?)
 """
 
 INSERT_RESTAURANTS = """
-INSERT INTO Restaurants (restaurant_id, name, address, city, state, zip_code, phone, avg_rating, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO Restaurants (restaurant_id, name, address, city, state, zip_code, phone, num_of_reviews, avg_rating, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
 INSERT_RESTAURANT_IMAGES = """
@@ -49,25 +49,54 @@ INSERT_RESTAURANTS_FTS_REBUILD = """
 INSERT INTO restaurants_fts(restaurants_fts) VALUES('rebuild');
 """
 
-# The following 2 queries are to initially set the average rating for restaurants,
-# subsequent updates to the Reviews table will update average ratings through triggers
-CALCULATE_AVG_RATINGS = """
+# The following 2 queries are to initially set the nuumber and average rating for restaurants,
+# subsequent updates to the Reviews table will update number and average ratings through triggers
+CALCULATE_RATINGS_DATA = """
 CREATE TEMP TABLE temp_ratings AS
 SELECT 
     r.restaurant_id,
-    COALESCE( ROUND( avg( rv.rating ), 1 ), 0 ) AS avg_rating
+    COALESCE( ROUND( avg( rv.rating ), 1 ), 0 ) AS avg_rating,
+    COUNT(rv.restaurant_id) AS num_of_reviews
 FROM Restaurants r
 LEFT JOIN Reviews rv ON r.restaurant_id = rv.restaurant_id
 GROUP BY r.restaurant_id;
 """
 
-UPDATE_AVG_RATINGS = """
+UPDATE_RATINGS_DATA = """
 UPDATE Restaurants
 SET avg_rating = (
     SELECT avg_rating
     FROM temp_ratings tr
     WHERE tr.restaurant_id = Restaurants.restaurant_id
+),
+    num_of_reviews = (
+    SELECT num_of_reviews
+    FROM temp_ratings tr
+    WHERE tr.restaurant_id = Restaurants.restaurant_id
 );
+"""
+
+SETUP_REVIEWS_INSERT_TRIGGER = """
+CREATE TRIGGER reviews_insert_trigger 
+AFTER INSERT ON Reviews
+FOR EACH ROW
+BEGIN
+    UPDATE Restaurants
+    SET avg_rating = ROUND( ( avg_rating * num_of_reviews + NEW.rating ) / ( num_of_reviews + 1 ), 1 ),
+        num_of_reviews = num_of_reviews + 1
+    WHERE restaurant_id = NEW.restaurant_id;
+END;
+"""
+
+SETUP_REVIEWS_UPDATE_TRIGGER = """
+CREATE TRIGGER reviews_update_trigger 
+AFTER UPDATE of rating ON Reviews
+FOR EACH ROW
+BEGIN
+    UPDATE Restaurants
+    SET avg_rating = ROUND( (SELECT AVG(rating) FROM Reviews WHERE restaurant_id = NEW.restaurant_id), 1 )
+    WHERE restaurant_id = NEW.restaurant_id;
+END;
 """
 
 if len(sys.argv) != 2:
@@ -132,10 +161,12 @@ try:
     # cursor.execute(INSERT_RESTAURANTS_FTS_REBUILD);
 
     # Calculates the average rating per restaurant and updates the database with the found values
-    print( "\nDone populating tables, now calculating and setting average rating per restaurant" )
+    print( "\nDone populating tables\nCalculating average rating per restaurant and setting up triggers" )
     print( "This may take a minute..." )
-    cursor.execute( CALCULATE_AVG_RATINGS )
-    cursor.execute( UPDATE_AVG_RATINGS )
+    cursor.execute( CALCULATE_RATINGS_DATA )
+    cursor.execute( UPDATE_RATINGS_DATA )
+    cursor.execute( SETUP_REVIEWS_INSERT_TRIGGER )
+    cursor.execute( SETUP_REVIEWS_UPDATE_TRIGGER )
     print( "DONE!" )
 
     conn.commit()
