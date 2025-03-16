@@ -21,24 +21,25 @@ function RestaurantPage() {
 
     const currentUserId = localStorage.getItem("userId");
 
-    useEffect(() => {
-        async function fetchRestaurant() {
-            try {
-                setIsLoading(true);
-                const response = await axios.get(
-                    `/api/restaurants/${restaurant_id}`
-                );
-                if (response.status >= 200 && response.status < 300) {
-                    setRestaurant(response.data.data);
-                } else {
-                    setError(response.data.error);
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
+    async function fetchRestaurant() {
+        try {
+            setIsLoading(true);
+            const response = await axios.get(
+                `/api/restaurants/${restaurant_id}`
+            );
+            if (response.status >= 200 && response.status < 300) {
+                setRestaurant(response.data.data);
+            } else {
+                setError(response.data.error);
             }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
+    }
+
+    useEffect(() => {
         fetchRestaurant();
     }, [restaurant_id]);
 
@@ -116,6 +117,8 @@ function RestaurantPage() {
                     created_at: new Date().toISOString(),
                 });
                 setEditMode(false);
+                // Refetch restaurant in order to reload the restaurants new average rating post trigger
+                fetchRestaurant();
             } else {
                 setSubmitError(response.data.error);
             }
