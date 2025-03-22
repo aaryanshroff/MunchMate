@@ -66,6 +66,8 @@ def _list_restaurants(
     query_args = []
 
     if len(type_ids) > 0:
+        # NOT SQL injection b/c we only substitute with X number of ?
+        # ? substitution is handled by SQLite engine
         placeholders = ", ".join(["?"] * len(type_ids))
         filter_predicates.append(f"rta.type_id IN ({placeholders})")
         query_args.extend(type_ids)
@@ -88,8 +90,6 @@ def _list_restaurants(
         where_clause = f"WHERE {filter_predicates[0] if len(filter_predicates) == 1 else ' AND '.join(filter_predicates)}"
 
     sql_file = Path("queries") / "filter_restaurants.sql"
-    # NOT SQL injection b/c we only substitute with X number of ?
-    # ? substitution is handled by SQLite engine
 
     filter_query = sql_file.read_text(encoding="utf-8").format(
         restaurant_search_join=restaurant_search_join,
