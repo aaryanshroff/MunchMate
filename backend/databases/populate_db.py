@@ -99,6 +99,40 @@ BEGIN
 END;
 """
 
+# FTS triggers to keep the search index in sync with the Restaurants table
+SETUP_RESTAURANTS_FTS_INSERT_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS restaurants_fts_insert_trigger
+AFTER INSERT ON Restaurants
+FOR EACH ROW
+BEGIN
+    INSERT INTO RestaurantSearch(rowid, name, address, city, state)
+    VALUES (NEW.restaurant_id, NEW.name, NEW.address, NEW.city, NEW.state);
+END;
+"""
+
+SETUP_RESTAURANTS_FTS_UPDATE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS restaurants_fts_update_trigger
+AFTER UPDATE ON Restaurants
+FOR EACH ROW
+BEGIN
+    UPDATE RestaurantSearch
+    SET name = NEW.name,
+        address = NEW.address,
+        city = NEW.city,
+        state = NEW.state
+    WHERE rowid = NEW.restaurant_id;
+END;
+"""
+
+SETUP_RESTAURANTS_FTS_DELETE_TRIGGER = """
+CREATE TRIGGER IF NOT EXISTS restaurants_fts_delete_trigger
+AFTER DELETE ON Restaurants
+FOR EACH ROW
+BEGIN
+    DELETE FROM RestaurantSearch WHERE rowid = OLD.restaurant_id;
+END;
+"""
+
 if len(sys.argv) != 2:
     print(
         f"FAILED: {sys.argv[0]} expects 2 args DB_TYPE=[sample|prod], received {len(sys.argv)} args"
@@ -150,6 +184,14 @@ try:
     conn = sqlite3.connect(DATASET)
     cursor = conn.cursor()
 
+    # Do before populating tables so that FTS is also populated together
+    print("Setting up FTS triggers")
+    cursor.execute(SETUP_RESTAURANTS_FTS_INSERT_TRIGGER)
+    cursor.execute(SETUP_RESTAURANTS_FTS_UPDATE_TRIGGER)
+    cursor.execute(SETUP_RESTAURANTS_FTS_DELETE_TRIGGER)
+    print("Done setting up FTS triggers")
+
+    print("Populating tables")
     for i in range(len(csv_files)):
         with open(csv_files[i], "r", encoding="utf-8") as file:
             print(f"Reading {csv_files[i]}")
@@ -157,17 +199,19 @@ try:
             data = [tuple(row) for row in csv_reader]
             cursor.executemany(QUERIES[i], data)
 
-    # TODO: Fix FTS
-    # cursor.execute(INSERT_RESTAURANTS_FTS_REBUILD);
-
     # Calculates the average rating per restaurant and updates the database with the found values
-    print( "\nDone populating tables\nCalculating average rating per restaurant and setting up triggers" )
-    print( "This may take a minute..." )
-    cursor.execute( CALCULATE_RATINGS_DATA )
-    cursor.execute( UPDATE_RATINGS_DATA )
-    cursor.execute( SETUP_REVIEWS_INSERT_TRIGGER )
-    cursor.execute( SETUP_REVIEWS_UPDATE_TRIGGER )
-    print( "DONE!" )
+    print(
+        "\nDone populating tables\nCalculating average rating per restaurant and setting up triggers"
+    )
+    print("This may take a minute...")
+    cursor.execute(CALCULATE_RATINGS_DATA)
+    cursor.execute(UPDATE_RATINGS_DATA)
+    cursor.execute(SETUP_REVIEWS_INSERT_TRIGGER)
+    cursor.execute(SETUP_REVIEWS_UPDATE_TRIGGER)
+    cursor.execute(SETUP_RESTAURANTS_FTS_INSERT_TRIGGER)
+    cursor.execute(SETUP_RESTAURANTS_FTS_UPDATE_TRIGGER)
+    cursor.execute(SETUP_RESTAURANTS_FTS_DELETE_TRIGGER)
+    print("DONE!")
 
     conn.commit()
     if conn:
