@@ -71,8 +71,17 @@ def _list_restaurants(
         query_args.extend(type_ids)
 
     if city != "":
-        filter_predicates.append(f"city = ?")
+        filter_predicates.append("r.city = ?")
         query_args.append(city)
+
+    # FTS5 is not case-sensitive
+    restaurant_search_join = ""
+    if search_term != "":
+        restaurant_search_join = (
+            "INNER JOIN RestaurantSearch rs ON rs.rowid = r.restaurant_id"
+        )
+        filter_predicates.append("RestaurantSearch MATCH ?")
+        query_args.append(search_term)
 
     where_clause = ""
     if filter_predicates:
@@ -81,8 +90,10 @@ def _list_restaurants(
     sql_file = Path("queries") / "filter_restaurants.sql"
     # NOT SQL injection b/c we only substitute with X number of ?
     # ? substitution is handled by SQLite engine
+
     filter_query = sql_file.read_text(encoding="utf-8").format(
-        where_clause=where_clause
+        restaurant_search_join=restaurant_search_join,
+        where_clause=where_clause,
     )
     print("filter_query", filter_query)
 
@@ -101,11 +112,6 @@ def _list_restaurants(
 
     print(results)
     return results, total
-
-    # TODO: Fix FTS
-    # if search_term:
-    #     sql_file = Path("queries") / "search_restaurants.sql"
-    #     params = (search_term,)
 
 
 @app.get("/api/restaurants/add")
