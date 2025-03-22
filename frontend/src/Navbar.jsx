@@ -36,7 +36,7 @@ const Navbar = () => {
                         onClick={() => navigate("/")}
                         className="btn btn-link text-decoration-none"
                     >
-                        MunchMate
+                        <h2 className="m-0">MunchMate</h2>
                     </button>
                     <button
                         onClick={() => navigate("/add-restaurant")}
