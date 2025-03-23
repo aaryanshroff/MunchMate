@@ -508,6 +508,21 @@ def search_users():
         print(f"{type(e).__name__}({e})")
         return {"error": str(e)}, 500
 
+@app.get("/api/users/<int:uid>/friends-restaurants")
+def get_friends_restaurants(uid):
+    try:
+        # Default limit to 10 if not provided, and convert to int.
+        limit = request.args.get("limit", default=10, type=int)
+        # Read the SQL query from the file.
+        sql_file = Path("queries") / "recommend_friends_restaurants.sql"
+        query = sql_file.read_text(encoding="utf-8")
+        # Execute query with current user id (three times) and limit as parameters.
+        results = db.query_db(query, (uid, uid, uid, limit))
+        return {"data": results}, 200
+    except Exception as e:
+        print(f"{type(e).__name__}({e})")
+        return {"error": str(e)}, 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

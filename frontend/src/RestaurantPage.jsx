@@ -143,7 +143,7 @@ function RestaurantPage() {
                         <strong>Phone:</strong> {restaurant.phone}
                     </p>
                     <p>
-                        <strong>Average Rating:</strong> {restaurant.avg_rating}
+                        <strong>Rating:</strong> {restaurant.avg_rating}
                     </p>
                     <p>
                         <strong>Created At:</strong>{" "}

@@ -44,6 +44,14 @@ const Navbar = () => {
                     >
                         Add Restaurant
                     </button>
+                    {userId && (
+                        <button
+                            onClick={() => navigate("/friends-recommendations")}
+                            className="btn btn-secondary ms-2"
+                        >
+                            Next on the Menu
+                        </button>
+                    )}
                 </div>
                 <div className="d-flex align-items-center">
                     <div className="dropdown me-3">
