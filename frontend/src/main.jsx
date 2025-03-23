@@ -10,16 +10,16 @@ import Profile from "./UserProfile.jsx";
 import Register from "./Register.jsx";
 import Login from "./Login.jsx";
 import UserSearchPage from "./UserSearchPage.jsx";
+import FriendsRecommendations from "./FriendsRecommendations.jsx";
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
         <BrowserRouter>
-            {/* https://reactrouter.com/start/library/routing */}
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Restaurants />} />
                     <Route
-                        path="/add-restaurant"
+                        path="add-restaurant"
                         element={<AddRestaurantPage />}
                     />
                     <Route
@@ -30,6 +30,10 @@ createRoot(document.getElementById("root")).render(
                     <Route path="register" element={<Register />} />
                     <Route path="login" element={<Login />} />
                     <Route path="users/search" element={<UserSearchPage />} />
+                    <Route
+                        path="friends-recommendations"
+                        element={<FriendsRecommendations />}
+                    />
                 </Route>
             </Routes>
         </BrowserRouter>
