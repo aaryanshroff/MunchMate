@@ -38,12 +38,14 @@ const Navbar = () => {
                     >
                         <h2 className="m-0">MunchMate</h2>
                     </button>
-                    <button
-                        onClick={() => navigate("/add-restaurant")}
-                        className="btn btn-secondary ms-2"
-                    >
-                        Add Restaurant
-                    </button>
+                    {userId && (
+                        <button
+                            onClick={() => navigate("/add-restaurant")}
+                            className="btn btn-secondary ms-2"
+                        >
+                            Add Restaurant
+                        </button>
+                    )}
                     {userId && (
                         <button
                             onClick={() => navigate("/friends-recommendations")}
