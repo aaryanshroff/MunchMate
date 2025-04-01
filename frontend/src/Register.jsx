@@ -127,7 +127,7 @@ function Register() {
             }
 
             console.log(response);
-            setUserId(response.data.user_id);
+            setUserId(parseInt(response.data.user_id));
             setButtonDisabled(true);
             handleSuccessResponseToastBootstrap.show();
         } catch (error) {
