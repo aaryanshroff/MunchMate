@@ -105,7 +105,6 @@ sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/
 ## Supported Features
 
 ### Basic Features
-
 - **R6 - Add Restaurants and Reviews**
     - Frontend:
         - frontend/src/AddRestaurantPage.jsx
@@ -166,4 +165,41 @@ sqlite3 {sample|prod}_dataset.db < ../../sql/test-{sample|prod}.sql > ../../sql/
         - backend/queries/get_user_profile.sql
 
 ### Advanced Features
+- **R11 - Full Text Search on Restaurants**
+    - Frontend:
+        - frontend/src/Restaurants.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/sql/create_tables.sql (Virtual Table found here)
+        - backend/databases/populate_db.py (Trigger found here)
+        - backend/queries/list_restaurants.sql
+        - backend/queries/search_restaurants.sql
 
+- **R12 - Average Review Triggers**
+    - Frontend:
+        - frontend/src/RestaurantPage.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/databases/populate_db.py (Trigger found here)
+        - backend/queries/get_restaurant_details.sql
+
+- **R13 - Anti SQL Injection**
+    - Frontend:
+        - All frontend access to endpoints.
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/db.py
+        - backend/queries (All queries found here: through parametrization of variables through '?')
+
+- **R14 - Next Restaurant To Visit Recommendation**
+    - Frontend:
+        - frontend/src/FriendsRecommendations.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py
+        - backend/queries/recommend_friends_restaurants.sql
+
+- **R15 - Pagination & Infinite Scroll of Restaurants**
+    - Frontend:
+        - frontend/src/Restaurants.jsx
+    - Backend Endpoints / SQL Queries:
+        - backend/app.py (Go to line 52: _list_restaurants)
